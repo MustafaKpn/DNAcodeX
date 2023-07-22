@@ -160,7 +160,7 @@ def huffman_decode(encoded_data, huffman_codes):
             continue
     return decoded_data
 
-def HuffGene_decode(file_name, output_filename='data_decoded.txt'):
+def DNAcodeX_decode(file_name, output_filename='data_decoded.txt'):
     """
     Decodes the DNA encoded data in the given file using Huffman coding.
     HuffGen decodes the first 7 DNA bases (first marker) to get the number of digits of the Huffman dictionary length (second marker).
@@ -202,7 +202,7 @@ def HuffGene_decode(file_name, output_filename='data_decoded.txt'):
     print("Data has been decoded and saved in the file: {}".format(output_filename))
     # return data_decoded
 
-# HuffGene_decode('alice_encoded.txt', 'alice_decoded.txt')
+
 parser = argparse.ArgumentParser(description='Huffman DNA decoder')
 
 parser.add_argument('-f', '--file_name',required=True, type=str, metavar='', help='The name of the file you want to decode.')
@@ -211,4 +211,4 @@ parser.add_argument('-t', '--output_filename', required=True, default='decoded_d
 args = parser.parse_args()
 
 if __name__ == '__main__':
-    HuffGene_decode(args.file_name, args.output_filename)
+    DNAcodeX_decode(args.file_name, args.output_filename)
