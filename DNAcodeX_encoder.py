@@ -112,6 +112,9 @@ def huffman_encode(data):
     print("* The payload has been encoded into DNA bases using Huffman coding.")    
     return encoded_payload, huffman_codes
 
+def utf8_bin(u):
+    # format as 8-digit binary
+    return ''.join([f'{i:08b}' for i in u.encode('utf-8')])
 
 def encode_huffman_instructions(huffman_codes):
     """
@@ -127,14 +130,15 @@ def encode_huffman_instructions(huffman_codes):
     for key, value in huffman_codes.items():
         codes += ',' + key + value  # Concatenate the key and value to form the encoded representation of the Huffman codes
 
-    binary_string = ''
-    bin_list = [bin(ord(chr)) for chr in codes]  # Convert each character to its ASCII value and then to a binary string
+    binary_string = utf8_bin(codes)
+    # binary_string = ''
+    # bin_list = [bin(ord(chr)) for chr in codes]  # Convert each character to its ASCII value and then to a binary string
     
-    for binary in bin_list:
-        binary = binary.replace('0b', '')
-        if len(binary) != 7:
-            binary = ('0' * (7 - len(binary))) + binary  # Pad the binary string with leading zeros to ensure it has a length of 7
-        binary_string = binary_string + binary  # Concatenate the binary strings to form the complete binary representation
+    # for binary in bin_list:
+    #     binary = binary.replace('0b', '')
+    #     if len(binary) != 7:
+    #         binary = ('0' * (7 - len(binary))) + binary  # Pad the binary string with leading zeros to ensure it has a length of 7
+    #     binary_string = binary_string + binary  # Concatenate the binary strings to form the complete binary representation
 
     table = binary_string.maketrans('10', 'GC')  # Create a translation table to convert '10' to 'GC'
     instructions_encoded = binary_string.translate(table)  # Apply the translation table to convert the binary representation to the encoded instructions
@@ -225,13 +229,17 @@ def HuffGene_encode(file_name, output_filename = 'encoded_data.txt'):
     Returns:
     - The encoded string representing the data.
     """
-    with open(file_name, 'rb') as f:
-        ascii_read = f.read()
+    with open(file_name, 'r', encoding='utf-8', newline='\r\n') as f:
+        read = f.read()
 
     data = ''
-    for value in ascii_read:
-        data += chr(value)
-
+    for chr in read:
+        data += chr
+    if '\r' in data:
+        print('File contains carriage character')
+    else:
+        print("File doesn't contain carriage character")
+        
     encoded_payload, huffman_codes = huffman_encode(data)  # Perform Huffman encoding on the data to obtain encoded data and Huffman codes
     encoded_instructions = encode_huffman_instructions(huffman_codes)  # Encode the Huffman codes to obtain the encoded instructions
     encoded_marker, len_instructions_len = encode_marker(encoded_instructions)  # Encode the length of the instructions to obtain the marker and length of instructions
