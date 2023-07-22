@@ -219,7 +219,7 @@ def gc_counter(string):
     gc = round((string.count('G') + string.count('C'))/len(string)*100, 3)
     return gc
 
-def HuffGene_encode(file_name, output_filename = 'encoded_data.txt'):
+def DNAcodeX_encode(file_name, output_filename = 'encoded_data.txt'):
     """
     Encodes the given data using Huffman coding, marker encoding, and marker length encoding.
 
@@ -273,7 +273,6 @@ def HuffGene_encode(file_name, output_filename = 'encoded_data.txt'):
     
     return encoded_string
 
-# HuffGene_encode('alice29.txt')
 parser = argparse.ArgumentParser(description='Huffman DNA encoding system.')
 
 parser.add_argument('-f', '--file_name', required=True, type=str, metavar='', help='The file name you want to encode.')
@@ -282,5 +281,5 @@ parser.add_argument('-t', '--output_filename', required=False, type=str, default
 args = parser.parse_args()
 
 if __name__ == '__main__':
-    HuffGene_encode(args.file_name, args.output_filename)
+    DNAcodeX_encode(args.file_name, args.output_filename)
 
