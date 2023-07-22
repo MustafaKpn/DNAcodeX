@@ -27,6 +27,42 @@ def decode_marker(marker):
 
     return integers
 
+def utf8_bin_decode(string):
+    decoded_string = ''
+    while len(string) != 0:
+
+        if string.startswith('0'):
+            f = string[:8]
+            string = string.removeprefix(f)
+            bit = int(f, 2)  # Convert the binary segment to an integer
+            bit = bit.to_bytes((bit.bit_length() + 7) // 8, 'big').decode('utf-8')
+            decoded_string += bit    
+
+        elif string.startswith('110'):
+            f = string[0:16]
+            string = string.removeprefix(f)
+            bit = int(f, 2)  # Convert the binary segment to an integer
+            bit = bit.to_bytes((bit.bit_length() + 7) // 8, 'big').decode('utf-8')
+            decoded_string += bit
+
+        elif string.startswith('1110'):
+            f = string[0:24]
+            string = string.removeprefix(f)
+            bit = int(f, 2)  # Convert the binary segment to an integer
+            bit = bit.to_bytes((bit.bit_length() + 7) // 8, 'big').decode('utf-8')
+            decoded_string += bit
+
+        elif string.startswith('11110'):
+            f = string[0:32]
+            string = string.removeprefix(f)
+            bit = int(f, 2)  # Convert the binary segment to an integer
+            bit = bit.to_bytes((bit.bit_length() + 7) // 8, 'big').decode('utf-8')
+            decoded_string += bit
+        else:
+            break
+        
+    return decoded_string
+
 def decode_huffman_instructions(instructions_nuc):
     """
     Decodes the Huffman instructions using a specific decoding scheme.
@@ -43,15 +79,16 @@ def decode_huffman_instructions(instructions_nuc):
     table = instructions_nuc.maketrans('GC', '10')  # Create a translation table to convert 'GC' to '10'
     instructions_bin = instructions_nuc.translate(table)  # Apply the translation table to convert the instructions from base-4 to base-2 representation
 
-    chrs = ''
-    n = 7  # Number of bits in each segment
-    x = [instructions_bin[i:i+n] for i in range(0, len(instructions_bin), n)]  # Split the instructions into segments of n bits
-    for bit in x:
-        bit = int(bit, 2)  # Convert the binary segment to an integer
-        bit = bit.to_bytes((bit.bit_length() + 7) // 8, 'big').decode()  # Convert the integer to its corresponding ASCII character
-        chrs += bit  # Concatenate the ASCII characters to form the decoded instructions string
+    binary_string = utf8_bin_decode(instructions_bin)
+    # chrs = ''
+    # n = 7  # Number of bits in each segment
+    # x = [instructions_bin[i:i+n] for i in range(0, len(instructions_bin), n)]  # Split the instructions into segments of n bits
+    # for bit in x:
+    #     bit = int(bit, 2)  # Convert the binary segment to an integer
+    #     bit = bit.to_bytes((bit.bit_length() + 7) // 8, 'big').decode()  # Convert the integer to its corresponding ASCII character
+    #     chrs += bit  # Concatenate the ASCII characters to form the decoded instructions string
 
-    return chrs
+    return binary_string
 
 def construct_huffman_dict(instructions_string):
     """
@@ -140,7 +177,7 @@ def HuffGene_decode(file_name, output_filename='data_decoded.txt'):
     - The decoded data saved in a text file.
 
     """
-    with open(file_name, 'r') as f:
+    with open(file_name, 'r', encoding='utf-8') as f:
         lines = f.readlines()
     encoded_data = ''
 
@@ -160,7 +197,7 @@ def HuffGene_decode(file_name, output_filename='data_decoded.txt'):
     data_decoded = huffman_decode(encoded_data[(marker_len + 1) * 7 + instructions_length:], huffman_dict)  # Decode the data using Huffman decoding
     print('Data has been decoded')
 
-    with open(output_filename, 'w') as f:
+    with open(output_filename, 'w', encoding='utf-8') as f:
         f.write(data_decoded)
     print("Data has been decoded and saved in the file: {}".format(output_filename))
     # return data_decoded
