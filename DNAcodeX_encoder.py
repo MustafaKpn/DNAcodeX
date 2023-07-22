@@ -235,6 +235,7 @@ def HuffGene_encode(file_name, output_filename = 'encoded_data.txt'):
     data = ''
     for chr in read:
         data += chr
+        
     if '\r' in data:
         print('File contains carriage character')
     else:
