@@ -194,6 +194,7 @@ def DNAcodeX_decode(file_name, output_filename='data_decoded.txt'):
     print('Huffman dictionary has been decoded.')
     huffman_dict = construct_huffman_dict(huffman_instructions_string)  # Construct the Huffman dictionary from the Huffman instructions
     print('Huffman dictionary has been constructed')
+    print('Number of unique characters found: {}'.format(len(huffman_dict)))
     data_decoded = huffman_decode(encoded_data[(marker_len + 1) * 7 + instructions_length:], huffman_dict)  # Decode the data using Huffman decoding
     print('Data has been decoded')
 
