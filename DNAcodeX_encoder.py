@@ -1,5 +1,27 @@
 import argparse
 
+
+######################################### General Functions #########################################
+def utf8_bin(u):
+    # format as 8-digit binary
+    return ''.join([f'{i:08b}' for i in u.encode('utf-8')])
+
+def map_to_dna(binary_string):
+
+    table = binary_string.maketrans('10', 'GC')  # Create a translation table to convert '10' to 'GC'
+    binary_string = binary_string.translate(table)  # Apply the translation table to convert the binary representation to the encoded marker
+
+    binary_string = list(binary_string)
+    for i in range(1, len(binary_string), 2):
+        if binary_string[i] == 'C':
+            binary_string[i] = 'T'  # Replace 'C' with 'T'
+        if binary_string[i] == 'G':
+            binary_string[i] = 'A'  # Replace 'G' with 'A'
+
+    binary_string = ''.join(binary_string)
+    return binary_string
+
+#################################### Huffman Encoding Functions ####################################
 class node:
     def __init__(self, symbol, frequency, left=None, right=None):
         # symbol
@@ -34,7 +56,6 @@ def build_frequency_table(data):
     print("* Frequency table has been created.")
     return frequency_table
 
-
 def build_huffman_tree(frequency_table):
     """
     Builds a Huffman tree based on the frequency table.
@@ -58,7 +79,6 @@ def build_huffman_tree(frequency_table):
     print("* Huffman tree has been built.")
     return nodes[0]  # Return the root node of the Huffman tree.
 
-
 def build_huffman_codes(node, code='', huffman_codes=[]):
     """
     Builds Huffman codes for each symbol in the Huffman tree.
@@ -77,9 +97,8 @@ def build_huffman_codes(node, code='', huffman_codes=[]):
     if node.symbol is not None:
         huffman_codes[node.symbol] = code  # Assign the Huffman code to the symbol.
 
-    build_huffman_codes(node.left, code + 'C', huffman_codes)  # Traverse the left child with 'C' appended to the code.
-    build_huffman_codes(node.right, code + 'G', huffman_codes)  # Traverse the right child with 'G' appended to the code.
-
+    build_huffman_codes(node.left, code + '0', huffman_codes)  # Traverse the left child with 'C' appended to the code.
+    build_huffman_codes(node.right, code + '1', huffman_codes)  # Traverse the right child with 'G' appended to the code.
 
 def huffman_encode(data):
     """
@@ -99,22 +118,9 @@ def huffman_encode(data):
     build_huffman_codes(huffman_tree, '', huffman_codes)  # Build Huffman codes for each symbol.
     
     encoded_payload = ''.join([huffman_codes[symbol] for symbol in data])  # Encode the input data using the Huffman codes.
-    
-    encoded_payload = list(encoded_payload)
-    for i in range(1, len(encoded_payload), 2):
-        if encoded_payload[i] == 'C':
-            encoded_payload[i] = 'T'  # Replace 'C' with 'T'.
-        if encoded_payload[i] == 'G':
-            encoded_payload[i] = 'A'  # Replace 'G' with 'A'.
-    encoded_payload = ''.join(encoded_payload)
-    
-    
+
     print("* The payload has been encoded into DNA bases using Huffman coding.")    
     return encoded_payload, huffman_codes
-
-def utf8_bin(u):
-    # format as 8-digit binary
-    return ''.join([f'{i:08b}' for i in u.encode('utf-8')])
 
 def encode_huffman_instructions(huffman_codes):
     """
@@ -131,54 +137,14 @@ def encode_huffman_instructions(huffman_codes):
         codes += ',' + key + value  # Concatenate the key and value to form the encoded representation of the Huffman codes
 
     binary_string = utf8_bin(codes)
-    # binary_string = ''
-    # bin_list = [bin(ord(chr)) for chr in codes]  # Convert each character to its ASCII value and then to a binary string
+
+    # table = binary_string.maketrans('10', 'GC')  # Create a translation table to convert '10' to 'GC'
+    # instructions_encoded = binary_string.translate(table)  # Apply the translation table to convert the binary representation to the encoded instructions
     
-    # for binary in bin_list:
-    #     binary = binary.replace('0b', '')
-    #     if len(binary) != 7:
-    #         binary = ('0' * (7 - len(binary))) + binary  # Pad the binary string with leading zeros to ensure it has a length of 7
-    #     binary_string = binary_string + binary  # Concatenate the binary strings to form the complete binary representation
-
-    table = binary_string.maketrans('10', 'GC')  # Create a translation table to convert '10' to 'GC'
-    instructions_encoded = binary_string.translate(table)  # Apply the translation table to convert the binary representation to the encoded instructions
+    # instructions_encoded = instructions_encoded.replace('CG', 'T')  # Replace 'CG' with 'T'
+    # instructions_encoded = instructions_encoded.replace('GC', 'A')  # Replace 'GC' with 'A'
     
-    instructions_encoded = instructions_encoded.replace('CG', 'T')  # Replace 'CG' with 'T'
-    instructions_encoded = instructions_encoded.replace('GC', 'A')  # Replace 'GC' with 'A'
-    
-    return instructions_encoded
-
-
-def encode_marker_len(marker):
-    """
-    Encodes the length of a marker using a specific encoding scheme.
-
-    Arguments:
-    - marker: The marker string.
-
-    Returns:
-    - The encoded marker length as a string.
-    """
-    marker_len = str(len(marker))  # Get the length of the marker as a string
-    binary = bin(ord(marker_len))  # Convert the length to its ASCII value and then to a binary string
-
-    binary = binary.replace('0b', '')
-    if len(binary) != 7:
-        binary = ('0' * (7 - len(binary))) + binary  # Pad the binary string with leading zeros to ensure it has a length of 7
-
-    table = binary.maketrans('10', 'GC')  # Create a translation table to convert '10' to 'GC'
-    marker_len_encoded = binary.translate(table)  # Apply the translation table to convert the binary representation to the encoded marker length
-
-    marker_len_encoded = list(marker_len_encoded)
-    for i in range(1, len(marker_len_encoded), 2):
-        if marker_len_encoded[i] == 'C':
-            marker_len_encoded[i] = 'T'  # Replace 'C' with 'T'
-        if marker_len_encoded[i] == 'G':
-            marker_len_encoded[i] = 'A'  # Replace 'G' with 'A'
-    marker_len_encoded = ''.join(marker_len_encoded)  # Convert the list back to a string
-
-    return marker_len_encoded
-
+    return binary_string
 
 def encode_marker(instructions_string):
     """
@@ -197,29 +163,16 @@ def encode_marker(instructions_string):
 
     for binary in bin_list:
         binary = binary.replace('0b', '')
-        if len(binary) != 7:
-            binary = ('0' * (7 - len(binary))) + binary  # Pad the binary string with leading zeros to ensure it has a length of 7
+        binary = binary.zfill(8)
         binary_string = binary_string + binary  # Concatenate the binary strings to form the complete binary representation
 
-    table = binary_string.maketrans('10', 'GC')  # Create a translation table to convert '10' to 'GC'
-    marker_encoded = binary_string.translate(table)  # Apply the translation table to convert the binary representation to the encoded marker
-
-    marker_encoded = list(marker_encoded)
-    for i in range(1, len(marker_encoded), 2):
-        if marker_encoded[i] == 'C':
-            marker_encoded[i] = 'T'  # Replace 'C' with 'T'
-        if marker_encoded[i] == 'G':
-            marker_encoded[i] = 'A'  # Replace 'G' with 'A'
-
-    marker_encoded = ''.join(marker_encoded)  # Convert the list back to a string
-
-    return marker_encoded, instructions_len
+    return binary_string, instructions_len
 
 def gc_counter(string):
     gc = round((string.count('G') + string.count('C'))/len(string)*100, 3)
     return gc
 
-def DNAcodeX_encode(file_name, output_filename = 'encoded_data.txt'):
+def read_chrs(file_name):
     """
     Encodes the given data using Huffman coding, marker encoding, and marker length encoding.
 
@@ -241,45 +194,149 @@ def DNAcodeX_encode(file_name, output_filename = 'encoded_data.txt'):
     else:
         print("File doesn't contain carriage character")
         
-    encoded_payload, huffman_codes = huffman_encode(data)  # Perform Huffman encoding on the data to obtain encoded data and Huffman codes
-    encoded_instructions = encode_huffman_instructions(huffman_codes)  # Encode the Huffman codes to obtain the encoded instructions
-    encoded_marker, len_instructions_len = encode_marker(encoded_instructions)  # Encode the length of the instructions to obtain the marker and length of instructions
+    return data
 
-    marker_len = encode_marker_len(len_instructions_len)  # Encode the length of the instructions length to obtain the marker length
-    encoded_string = marker_len + encoded_marker + encoded_instructions + encoded_payload  # Concatenate the marker length, marker, instructions, and data to form the final encoded string
+#################################### Hamming Error Correction Functions ####################################
+
+def bit_switch(bit):
+    if bit == 1:
+        return 0
+    elif bit == 0:
+        return 1
     
-    data_bits = len(data) * 8
-    encoded_payload_bits = len(encoded_payload)
+def add_hamming(string):
+    string_list = []
+
+    for i in string:
+        string_list.append(int(i))
+
+    parity_list = []
+    if len(string_list) == 4:
+        x1 = string_list[0] ^ string_list[1] ^ string_list[3]
+        parity_list.append(str(x1))
+        x2 = string_list[0] ^ string_list[2] ^ string_list[3]
+        parity_list.append(str(x2))
+        x3 = string_list[1] ^ string_list[2] ^ string_list[3]
+        parity_list.append(str(x3))
+
+    elif len(string_list) == 3:
+        x1 = string_list[0] ^ string_list[1]
+        parity_list.append(str(x1))
+        x2 = string_list[1] ^ string_list[2]
+        parity_list.append(str(x2))
+        x3 = string_list[0] ^ string_list[2]
+        parity_list.append(str(x3)) 
+
+    elif len(string_list) == 2:
+        x1 = bit_switch(string_list[0])
+        parity_list.append(str(x1))
+        x2 = bit_switch(string_list[1])
+        parity_list.append(str(x2))
+        x3 = string_list[0] ^ string_list[1]
+        parity_list.append(str(x3))
+
+    elif len(string_list) == 1:
+        x1 = string_list[0]
+        x2 = string_list[0]
+        parity_list.append(str(x1))
+        parity_list.append(str(x2))
+
+    binary_string = string + ''.join(parity_list)
+    return binary_string
+
+def add_hamming_to_string(string):
+    codewords = ''
+    parity_counts = 0
+
+    for i in range(0, len(string), 4):
+        bits_string = string[i:i+4]
+        codewords = codewords + add_hamming(bits_string)
+
+        if len(bits_string) == 4 or len(bits_string) == 3 or len(bits_string) == 2:
+            parity_counts += 3
+        elif len(bits_string) == 1:
+            parity_counts += 2
     
-    print("\n\033[1;34m#################### Encoding Info ####################\033[0m")
-    print("> Space usage before Huffman encoding: \033[1;31m{}\033[0m bits".format(data_bits))
-    print("> Space usage after Huffman encoding: \033[1;32m{}\033[0m bits".format(encoded_payload_bits))
-    print("> Compression ratio: \033[1;32m{} %\033[0m".format(round((encoded_payload_bits)/data_bits * 100, 3)))
+    print('{} parity bits were added.'.format(parity_counts))
+    return codewords
+
+def file_to_binary(file_data):
+    bytes_list = []
+    for byte in file_data:
+        binary = str(bin(byte)).replace('0b', '').zfill(8)
+        bytes_list.append(binary)
+
+    binary_string = ''.join(bytes_list)
     
-    print("\n> Length of marker: {} DNA bases".format(len(encoded_marker)))
-    print("> Length of Huffman dictionary: {} DNA bases".format(len(encoded_instructions)))
-    print("> Length of payload: {} DNA bases".format(len(encoded_payload)))
-    
-    print("\n> GC-content of Huffman dictionary: {} %".format(gc_counter(encoded_instructions)))
-    print("> GC-content of payload: {} %".format(gc_counter(encoded_payload)))
-    print("> GC-content of the file: {} %".format(gc_counter(encoded_string)))
-    
-    print("\n> Full length of the encoded file: \033[1;32m{}\033[0m DNA bases".format((len(encoded_string))))  # Print the length of the encoded string
-    print("> Ratio of decoding information to the full encoded data: \033[1;32m{} %\033[0m".format(round((len(marker_len) + len(encoded_marker) + len(encoded_instructions))/len(encoded_string)*100, 3)))
-    
-    with open(output_filename, 'w') as f:
-        f.write(encoded_string)
-    print("\n> Note: DNA encoded data was saved in the \033[1;36m{}\033[0m".format(output_filename))
-    
-    return encoded_string
+    return binary_string
+
+############################################################################################################
 
 parser = argparse.ArgumentParser(description='Huffman DNA encoding system.')
 
 parser.add_argument('-f', '--file_name', required=True, type=str, metavar='', help='The file name you want to encode.')
-parser.add_argument('-t', '--output_filename', required=False, type=str, default='encoded_data.txt', metavar='', help='The name of the output file you want to save the encoded data in.')
+parser.add_argument('-huffman', '--Huffman', required=False, action='store_true', help='To be called if you want the encoded file to be compressed using Huffman variable length codes.')
+parser.add_argument('-t', '--type', required=True, choices=['jpg', 'jpeg', 'png', 'txt', 'gz', 'txt.gz'], metavar='', help='The format of the file you are encoding.')
+parser.add_argument('-o', '--output_filename', required=False, type=str, default='encoded_data.txt', metavar='', help='The name of the output file you want to save the encoded data in.')
 
 args = parser.parse_args()
 
 if __name__ == '__main__':
-    DNAcodeX_encode(args.file_name, args.output_filename)
 
+    if args.Huffman == True:
+        if args.type == 'txt':
+            data = read_chrs(args.file_name)
+
+            suffix = '_text.txt'
+            data_bits = len(data) * 8
+            
+
+        elif args.type == 'jpeg' or args.type == 'jpg' or args.type == 'png' or args.type == 'gz' or args.type == 'txt.gz':
+            with open(args.file_name, 'rb') as f:
+                read = f.read()
+                
+            data = ''
+            for byte in read:
+                data += str(byte).zfill(3)
+
+            suffix = '_{}.txt'.format(args.type)
+
+        encoded_payload, huffman_codes = huffman_encode(data)  # Perform Huffman encoding on the data to obtain encoded data and Huffman codes
+        encoded_instructions = encode_huffman_instructions(huffman_codes)  # Encode the Huffman codes to obtain the encoded instructions
+        encoded_marker, len_instructions_len = encode_marker(encoded_instructions)  # Encode the length of the instructions to obtain the marker and length of instructions
+        marker_len = encode_marker(len_instructions_len)  # Encode the length of the instructions length to obtain the marker length
+        binary_data = marker_len[0] + encoded_marker + encoded_instructions + encoded_payload # Concatenate the marker length, marker, instructions, and data to form the final encoded string
+        encoded_payload_bits = len(encoded_payload)
+
+        # print("\n\033[1;34m#################### Encoding Info ####################\033[0m")
+        # print("> Huffman compression is applied")
+        # print("> Space usage before Huffman encoding: \033[1;31m{}\033[0m bits".format(data_bits))
+        # print("> Space usage after Huffman encoding: \033[1;32m{}\033[0m bits".format(encoded_payload_bits))
+        # print("> Compression ratio: \033[1;32m{} %\033[0m".format(round((encoded_payload_bits)/data_bits * 100, 3)))
+        # print("> GC-content of the file: {} %".format(gc_counter(binary_data)))
+        # # print("\n> Full length of the encoded file: \033[1;32m{}\033[0m DNA bases".format((len(dna_mapped_data))))  # Print the length of the encoded string
+        # # print("> Ratio of decoding information to the full encoded data: \033[1;32m{} %\033[0m".format(round((len(marker_len) + len(encoded_marker) + len(encoded_instructions))/len(encoded_string)*100, 3)))
+            
+
+            
+    elif args.Huffman == False:
+        if args.type == 'txt':
+            with open(args.file_name, 'r', encoding='utf-8', newline='\r\n') as f:
+                read = f.read()
+            binary_data = utf8_bin(read)  
+            suffix = '_text.txt'
+
+        elif args.type == 'jpeg' or args.type == 'jpg' or args.type == 'png' or args.type == 'gz' or args.type == 'txt.gz':
+            with open(args.file_name, 'rb') as f:
+                read = f.read()
+            binary_data = file_to_binary(read)
+            suffix = '_{}.txt'.format(args.type)
+
+    binary_data_hamming = add_hamming_to_string(binary_data)
+    output_data = map_to_dna(binary_data_hamming)
+
+    output_filename = args.output_filename + suffix
+    with open(output_filename, 'w') as f:
+        f.write(output_data)
+    print("\n> Note: DNA encoded data was saved in the \033[1;36m{}\033[0m".format(output_filename))
+    
