@@ -1,31 +1,17 @@
 import argparse
+import datetime
 
-def decode_marker(marker):
-    """
-    Decodes the marker using a specific decoding scheme.
 
-    Arguments:
-    - marker: The encoded marker string.
+######################################### General Functions #######################################
 
-    Returns:
-    - The decoded marker as an integer.
-    """
-    table1 = marker.maketrans('TA', 'CG')  # Create a translation table to convert 'TA' to 'CG'
-    marker = marker.translate(table1)  # Apply the translation table to convert the marker back to its original form
+def dna_to_binary(data):
+    data = data.replace('T', 'C')
+    data = data.replace('A', 'G')
 
-    table2 = marker.maketrans('GC', '10')  # Create a translation table to convert 'GC' to '10'
-    marker = marker.translate(table2)  # Apply the translation table to convert the marker from base-4 to base-2 representation
+    table = data.maketrans('GC', '10')
+    decoded_dna = data.translate(table)
 
-    integers = ''
-    n = 7  # Number of bits in each segment
-    x = [marker[i:i+n] for i in range(0, len(marker), n)]  # Split the marker into segments of n bits
-    for bit in x:
-        bit = int(bit, 2)  # Convert the binary segment to an integer
-        bit = bit.to_bytes((bit.bit_length() + 7) // 8, 'big').decode()  # Convert the integer to its corresponding ASCII character
-        integers += bit  # Concatenate the ASCII characters to form the decoded marker string
-    integers = int(integers)  # Convert the decoded marker string to an integer
-
-    return integers
+    return decoded_dna
 
 def utf8_bin_decode(string):
     decoded_string = ''
@@ -34,61 +20,70 @@ def utf8_bin_decode(string):
         if string.startswith('0'):
             f = string[:8]
             string = string.removeprefix(f)
-            bit = int(f, 2)  # Convert the binary segment to an integer
-            bit = bit.to_bytes((bit.bit_length() + 7) // 8, 'big').decode('utf-8')
-            decoded_string += bit    
+            try:
+                bit = int(f, 2)  # Convert the binary segment to an integer
+                bit = bit.to_bytes((bit.bit_length() + 7) // 8, 'big').decode('utf-8')
+                decoded_string += bit 
+            except:
+                pass
+            # decoded_string += bit    
 
         elif string.startswith('110'):
             f = string[0:16]
             string = string.removeprefix(f)
-            bit = int(f, 2)  # Convert the binary segment to an integer
-            bit = bit.to_bytes((bit.bit_length() + 7) // 8, 'big').decode('utf-8')
-            decoded_string += bit
+            try:
+                bit = int(f, 2)  # Convert the binary segment to an integer
+                bit = bit.to_bytes((bit.bit_length() + 7) // 8, 'big').decode('utf-8')
+                decoded_string += bit
+            except:
+                pass
 
         elif string.startswith('1110'):
             f = string[0:24]
             string = string.removeprefix(f)
-            bit = int(f, 2)  # Convert the binary segment to an integer
-            bit = bit.to_bytes((bit.bit_length() + 7) // 8, 'big').decode('utf-8')
-            decoded_string += bit
+            try:
+                bit = int(f, 2)  # Convert the binary segment to an integer
+                bit = bit.to_bytes((bit.bit_length() + 7) // 8, 'big').decode('utf-8')
+                decoded_string += bit
+            except:
+                pass
 
         elif string.startswith('11110'):
             f = string[0:32]
             string = string.removeprefix(f)
-            bit = int(f, 2)  # Convert the binary segment to an integer
-            bit = bit.to_bytes((bit.bit_length() + 7) // 8, 'big').decode('utf-8')
-            decoded_string += bit
+            try:
+                bit = int(f, 2)  # Convert the binary segment to an integer
+                bit = bit.to_bytes((bit.bit_length() + 7) // 8, 'big').decode('utf-8')
+                decoded_string += bit
+            except:
+                pass
         else:
             break
         
     return decoded_string
 
-def decode_huffman_instructions(instructions_nuc):
+#################################### Huffman Decoding Functions ####################################
+
+def decode_header(header):
     """
-    Decodes the Huffman instructions using a specific decoding scheme.
+    Decodes the header using a specific decoding scheme.
 
     Arguments:
-    - instructions_nuc: The encoded Huffman instructions string.
+    - header: The encoded header string.
 
     Returns:
-    - The decoded Huffman instructions as a string.
+    - The decoded header as an integer.
     """
-    instructions_nuc = instructions_nuc.replace('T', 'CG')  # Replace 'T' with 'CG'
-    instructions_nuc = instructions_nuc.replace('A', 'GC')  # Replace 'A' with 'GC'
-    
-    table = instructions_nuc.maketrans('GC', '10')  # Create a translation table to convert 'GC' to '10'
-    instructions_bin = instructions_nuc.translate(table)  # Apply the translation table to convert the instructions from base-4 to base-2 representation
+    integers = ''
+    n = 8  # Number of bits in each segment
+    x = [header[i:i+n] for i in range(0, len(header), n)]  # Split the header into segments of n bits
+    for bit in x:
+        bit = int(bit, 2)  # Convert the binary segment to an integer
+        bit = bit.to_bytes((bit.bit_length() + 7) // 8, 'big').decode()  # Convert the integer to its corresponding ASCII character
+        integers += bit  # Concatenate the ASCII characters to form the decoded header string
+    integers = int(integers)  # Convert the decoded header string to an integer
 
-    binary_string = utf8_bin_decode(instructions_bin)
-    # chrs = ''
-    # n = 7  # Number of bits in each segment
-    # x = [instructions_bin[i:i+n] for i in range(0, len(instructions_bin), n)]  # Split the instructions into segments of n bits
-    # for bit in x:
-    #     bit = int(bit, 2)  # Convert the binary segment to an integer
-    #     bit = bit.to_bytes((bit.bit_length() + 7) // 8, 'big').decode()  # Convert the integer to its corresponding ASCII character
-    #     chrs += bit  # Concatenate the ASCII characters to form the decoded instructions string
-
-    return binary_string
+    return integers
 
 def construct_huffman_dict(instructions_string):
     """
@@ -138,10 +133,6 @@ def huffman_decode(encoded_data, huffman_codes):
     current_code = ''  # Initialize an empty string to store the current code being processed
     decoded_data = ''  # Initialize an empty string to store the decoded data
     print(inverse_codes)
-    print("inverse codes were created")
-    table = encoded_data.maketrans('TA', 'CG')  # Create a translation table to convert 'TA' to 'CG'
-    encoded_data = encoded_data.translate(table)  # Apply the translation table to convert the encoded data back to its original form
-    print('Encoded data was transferred to CG')
     # open(file_name, 'w').close()
     # print('{} was created'.format(file_name))
 
@@ -160,7 +151,7 @@ def huffman_decode(encoded_data, huffman_codes):
             continue
     return decoded_data
 
-def DNAcodeX_decode(file_name, output_filename='data_decoded.txt'):
+def read_file(file_name):
     """
     Decodes the DNA encoded data in the given file using Huffman coding.
     HuffGen decodes the first 7 DNA bases (first marker) to get the number of digits of the Huffman dictionary length (second marker).
@@ -184,32 +175,265 @@ def DNAcodeX_decode(file_name, output_filename='data_decoded.txt'):
     for line in lines:
         encoded_data += line
 
-    marker_len = decode_marker(encoded_data[:7])  # Decode the marker length from the encoded data string
-    print('Marker has been decoded')
+    return encoded_data
 
-    instructions_length = decode_marker(encoded_data[7: (marker_len + 1) * 7])  # Decode the length of the instructions from the encoded data string
-    print('Instructions length is {}'.format(instructions_length))
+#################################### Hamming Error Correction Functions ############################
 
-    huffman_instructions_string = decode_huffman_instructions(encoded_data[(marker_len + 1) * 7: ((marker_len + 1) * 7 + instructions_length)])  # Decode the Huffman instructions from the encoded data string
-    print('Huffman dictionary has been decoded.')
-    huffman_dict = construct_huffman_dict(huffman_instructions_string)  # Construct the Huffman dictionary from the Huffman instructions
-    print('Huffman dictionary has been constructed')
-    print('Number of unique characters found: {}'.format(len(huffman_dict)))
-    data_decoded = huffman_decode(encoded_data[(marker_len + 1) * 7 + instructions_length:], huffman_dict)  # Decode the data using Huffman decoding
-    print('Data has been decoded')
+def bit_switch(bit):
+    if bit == 1:
+        return 0
+    elif bit == 0:
+        return 1
+    
+def hamming_correct(string):
+    test = []
+    for i in string:
+        test.append(int(i))
 
-    with open(output_filename, 'w', encoding='utf-8') as f:
-        f.write(data_decoded)
-    print("Data has been decoded and saved in the file: {}".format(output_filename))
-    # return data_decoded
+    if len(test) == 7:
+        x1 = test[0] ^ test[1] ^ test[3]
+        x2 = test[0] ^ test[2] ^ test[3]
+        x3 = test[1] ^ test[2] ^ test[3]
 
+        p1 = x1 == test[4]
+        p2 = x2 == test[5]
+        p3 = x3 == test[6]
+
+        error = False
+
+        if p1 == False and p2 == False and p3 == True:
+            # print('Error is at the bit number: 1')
+            test[0] = bit_switch(test[0])
+            error = True
+
+        elif p1 == False and p2 == True and p3 == False:
+            # print('Error is at the bit number: 2')
+            test[1] = bit_switch(test[1])
+            error = True
+
+        elif p1 == True and p2 == False and p3 == False:
+            # print('Error is at the bit number: 3')
+            test[2] = bit_switch(test[2])
+            error = True 
+
+        elif p1 == False and p2 == False and p3 == False:
+            # print('Error is at the bit number: 4')
+            test[3] = bit_switch(test[3])
+            error = True
+
+        elif p1 == False and p2 == True and p3 == True:
+            # print('Error is at the bit number: 5')
+            test[4] = bit_switch(test[4])
+            error = True
+
+        elif p1 == True and p2 == False and p3 == True:
+            # print('Error is at the bit number: 6')
+            test[5] = bit_switch(test[5])
+
+        elif p1 == True and p2 == True and p3 == False:
+            # print('Error is at the bit number: 7')
+            test[6] = bit_switch(test[6])
+            error = True
+
+        elif p1 == True and p2 == True and p3 == True:
+            # print('There are no errors in the string')
+            error = False
+            pass
+    
+    elif len(test) == 6:
+        x1 = test[0] ^ test[1]
+        x2 = test[1] ^ test[2]
+        x3 = test[0] ^ test[2]
+
+        p1 = x1 == test[3]
+        p2 = x2 == test[4]
+        p3 = x3 == test[5]
+
+        if p1 == False and p2 == True and p3 == False:
+            test[0] = bit_switch(test[0])
+            error = True
+
+        elif p1 == False and p2 == False and p3 == True:
+            test[1] = bit_switch(test[1])
+            error = True
+
+        elif p1 == False and p2 == False and p3 == True:
+            test[2] = bit_switch(test[2])
+            error = True 
+
+        elif p1 == False and p2 == True and p3 == True:
+            # print('Error is at the bit number: 4')
+            test[3] = bit_switch(test[3])
+            error = True
+
+        elif p1 == True and p2 == False and p3 == True:
+            # print('Error is at the bit number: 5')
+            test[4] = bit_switch(test[4])
+            error = True
+
+        elif p1 == True and p2 == True and p3 == False:
+            # print('Error is at the bit number: 6')
+            test[5] = bit_switch(test[5])
+            error = True
+
+        elif p1 == True and p2 == True and p3 == True:
+            # print('There are no errors in the string')
+            error = False
+            pass
+
+    elif len(test) == 5:
+        x1 = bit_switch(test[0])
+        x2 = bit_switch(test[1])
+        x3 = test[0] ^ test[1]
+
+        p1 = x1 == test[2]
+        p2 = x2 == test[3]
+        p3 = x3 == test[4]
+
+        if p1 == False and p2 == True and p3 == False:
+            test[0] = bit_switch(test[0])
+            error = True
+
+        elif p1 == True and p2 == False and p3 == False:
+            test[1] = bit_switch(test[1])
+            error = True
+
+        elif p1 == False and p2 == True and p3 == True:
+            test[2] = bit_switch(test[2])
+            error = True 
+
+        elif p1 == True and p2 == False and p3 == True:
+            # print('Error is at the bit number: 4')
+            test[3] = bit_switch(test[3])
+            error = True
+
+        elif p1 == True and p2 == True and p3 == False:
+            # print('Error is at the bit number: 5')
+            test[4] = bit_switch(test[4])
+            error = True
+
+        elif p1 == True and p2 == True and p3 == True:
+            # print('There are no errors in the string')
+            error = False
+            pass
+
+    elif len(test) == 3:
+        test[0] = max(set(test), key = test.count)
+        
+    corrected_string = ''.join([str(i) for i in test])
+    
+    return corrected_string
+
+def correct_string(string):
+
+    current_time = datetime.datetime.now()
+    formatted_time = current_time.strftime("%Y%m%d%H%M%S")
+
+    corrected_string = ''
+    errors_count = 0
+    open('Hamming_corrected_sequences_{}.csv'.format(formatted_time), 'w').close()
+    
+    for i in range(0, len(string), 7):
+        codeword_dna = string[i:i+7]
+        codeword_binary = dna_to_binary(codeword_dna)
+        corrected_codeword_binary = hamming_correct(codeword_binary)
+        corrected_string += corrected_codeword_binary
+
+        # if corrected_codeword_binary[1] == True:
+        #     errors_count += 1
+        #     with open('Hamming_corrected_sequences_{}.csv'.format(formatted_time), 'a') as f:
+        #         f.write(codeword_dna + ',' + corrected_codeword_binary[0] + ',' + codeword_binary + ',' + '{}:{}\n'.format(i, i+7))
+
+    return corrected_string, errors_count
+
+def remove_hamming_bits(data):
+
+    data_without_parity = ''
+
+    parity_count = 0
+    for i in range(0, len(data), 7):
+        binary_string = data[i:i+7]
+        if len(binary_string) == 7:
+            data_without_parity += data[i:i+4]
+            parity_count += 3
+        elif len(binary_string) == 6:
+            data_without_parity += data[i:i+3]
+            parity_count += 3
+        elif len(binary_string) == 5:
+            data_without_parity += data[i:i+2]
+            parity_count += 3
+        elif len(binary_string) == 3:
+            data_without_parity += data[i:i+1]
+            parity_count += 2
+            
+
+    parity_count = parity_count 
+    return data_without_parity, parity_count
+
+def binary_to_image_bytes(binary_data):
+    image_bytes = b''
+    for i in range(0, len(binary_data), 8):
+        eight_bits = binary_data[i:i+8]
+        integer = int(eight_bits, 2)
+        bytes = integer.to_bytes(1, byteorder='big')
+        image_bytes += bytes
+    
+    return image_bytes
+
+#####################################################################################################
 
 parser = argparse.ArgumentParser(description='Huffman DNA decoder')
 
 parser.add_argument('-f', '--file_name',required=True, type=str, metavar='', help='The name of the file you want to decode.')
-parser.add_argument('-t', '--output_filename', required=True, default='decoded_data.txt', type=str, metavar='', help='The name of the output file you want to save the decoded data in.')
+parser.add_argument('-huffman', '--Huffman', required=False, action='store_true', help='To be called if Huffman compression was used when the file was encoded.')
+parser.add_argument('-t', '--type', required=True, choices=['jpg', 'jpeg', 'png', 'txt', 'gz', 'txt.gz'], metavar='', help='The format of the file you are decoding.')
+parser.add_argument('-o', '--output_filename', required=True, default='decoded_data.txt', type=str, metavar='', help='The name of the output file you want to save the decoded data in.')
 
 args = parser.parse_args()
 
 if __name__ == '__main__':
-    DNAcodeX_decode(args.file_name, args.output_filename)
+
+    with open(args.file_name, 'r', encoding='utf-8', newline='\r\n') as f:
+        data = f.read()
+
+    corrected_data, errors_count = correct_string(data)
+    data_without_parity, parity_count = remove_hamming_bits(corrected_data)
+
+    output_filename = args.output_filename + '.{}'.format(args.type)
+    open(output_filename, 'w').close()
+
+    if args.Huffman == True:
+        header_len = decode_header(dna_to_binary(data_without_parity[:8]))  # Decode the marker length from the encoded data string
+        instructions_length = decode_header(dna_to_binary(data_without_parity[8: (header_len + 1) * 8]))  # Decode the length of the instructions from the encoded data string
+        huffman_instructions_string_binary = utf8_bin_decode(dna_to_binary(data_without_parity[(header_len + 1) * 8: ((header_len + 1) * 8 + instructions_length)]))  # Decode the Huffman instructions from the encoded data string
+        huffman_dict = construct_huffman_dict(huffman_instructions_string_binary)  # Construct the Huffman dictionary from the Huffman instructions
+        payload_decoded = huffman_decode(dna_to_binary(data_without_parity[(header_len + 1) * 8 + instructions_length:]), huffman_dict)  # Decode the data using Huffman decoding
+        
+        if args.type == 'txt':
+
+            with open(output_filename, 'w', encoding='utf-8') as f:
+                f.write(payload_decoded)
+            print("Data has been decoded and saved in the file: {}".format(output_filename))
+
+        elif args.type == 'png' or args.type == 'jpg' or args.type == 'gz' or args.type == 'txt.gz':
+            
+            with open(output_filename, 'wb') as bytes_file:
+                for i in range(0, len(payload_decoded), 3):
+                    integer = int(payload_decoded[i:i+3])
+                    bytes_data = integer.to_bytes(1, byteorder='big')
+                    bytes_file.write(bytes_data)
+
+    
+    elif args.Huffman == False:
+        
+        if args.type == 'txt':
+            decoded_data = utf8_bin_decode(data_without_parity)
+
+            with open(output_filename, 'a') as f:
+                f.write(decoded_data)
+        
+        elif args.type == 'png' or args.type == 'jpg' or args.type == 'gz' or args.type == 'txt.gz': 
+            decoded_data = binary_to_image_bytes(data_without_parity)
+    
+            with open(output_filename, 'wb') as binary_file:
+                binary_file.write(decoded_data)
