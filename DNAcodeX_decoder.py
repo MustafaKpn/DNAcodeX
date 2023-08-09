@@ -1,6 +1,6 @@
 import argparse
 import datetime
-
+import os
 
 ######################################### General Functions #######################################
 
@@ -318,11 +318,16 @@ def hamming_correct(string):
             pass
 
     elif len(test) == 3:
-        test[0] = max(set(test), key = test.count)
-        
+        if test[0] != max(set(test), key = test.count):
+            test[0] = max(set(test), key = test.count)
+            error = True
+        else:
+            error = False
+            pass
+
     corrected_string = ''.join([str(i) for i in test])
     
-    return corrected_string
+    return corrected_string, error
 
 def correct_string(string):
 
@@ -331,18 +336,20 @@ def correct_string(string):
 
     corrected_string = ''
     errors_count = 0
-    open('Hamming_corrected_sequences_{}.csv'.format(formatted_time), 'w').close()
+
+    sequences_file_name = 'Hamming_corrected_sequences_{}.csv'.format(formatted_time)
+    open(sequences_file_name, 'w').close()
     
     for i in range(0, len(string), 7):
         codeword_dna = string[i:i+7]
         codeword_binary = dna_to_binary(codeword_dna)
-        corrected_codeword_binary = hamming_correct(codeword_binary)
+        corrected_codeword_binary, error = hamming_correct(codeword_binary)
         corrected_string += corrected_codeword_binary
 
-        # if corrected_codeword_binary[1] == True:
-        #     errors_count += 1
-        #     with open('Hamming_corrected_sequences_{}.csv'.format(formatted_time), 'a') as f:
-        #         f.write(codeword_dna + ',' + corrected_codeword_binary[0] + ',' + codeword_binary + ',' + '{}:{}\n'.format(i, i+7))
+        if error == True:
+            errors_count += 1
+            with open(sequences_file_name, 'a') as f:
+                f.write(codeword_dna + ',' + corrected_codeword_binary + ',' + codeword_binary + ',' + '{}:{}\n'.format(i, i+(len(codeword_binary))))
 
     return corrected_string, errors_count
 
@@ -393,11 +400,22 @@ args = parser.parse_args()
 
 if __name__ == '__main__':
 
+    input_file_size = os.path.getsize('./{}'.format(args.file_name))
+    print("\n\033[1;34m############################ Decoding Info ############################\033[0m")
+    print("\033[1;35m# Input File Name:\033[0m \033[93m{}\033[0m".format(args.file_name))
+    print("\033[1;35m# Output File Format:\033[0m \033[93m{}\033[0m".format(args.type))
+    print("\033[1;35m# File Size:\033[0m \033[93m{} bytes\033[0m".format(input_file_size))
+    print("\033[1;35m# Huffman:\033[0m \033[93m{}\033[0m".format(args.Huffman))
+    print("\033[1;35m# Error Correction Method:\033[0m \033[93mHamming\033[0m")
+
     with open(args.file_name, 'r', encoding='utf-8', newline='\r\n') as f:
         data = f.read()
 
     corrected_data, errors_count = correct_string(data)
+    print("> Hamming correction has been applied.")
+    print("> The mutated and corrected sequences (if any), have been saved in the file: ")
     data_without_parity, parity_count = remove_hamming_bits(corrected_data)
+    print("Hamming correction parity check bits were removed from the input file.")
 
     output_filename = args.output_filename + '.{}'.format(args.type)
     open(output_filename, 'w').close()
