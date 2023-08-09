@@ -429,5 +429,6 @@ if __name__ == '__main__':
             decoded_data = binary_to_image_bytes(data_without_parity)
             with open(output_filename, 'wb') as binary_file:
                 binary_file.write(decoded_data)
-
+    output_file_size = os.path.getsize('./{}'.format(output_filename))
+    print("> Final output file size: \033[1;32m{} bytes\033[0m".format(output_file_size))
     print("> Data has been decoded and saved in the file: \033[1;36m{}\033[0m\n".format(output_filename))
