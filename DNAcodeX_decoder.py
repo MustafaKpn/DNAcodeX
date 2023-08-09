@@ -202,41 +202,33 @@ def hamming_correct(string):
         error = False
 
         if p1 == False and p2 == False and p3 == True:
-            # print('Error is at the bit number: 1')
             test[0] = bit_switch(test[0])
             error = True
 
         elif p1 == False and p2 == True and p3 == False:
-            # print('Error is at the bit number: 2')
             test[1] = bit_switch(test[1])
             error = True
 
         elif p1 == True and p2 == False and p3 == False:
-            # print('Error is at the bit number: 3')
             test[2] = bit_switch(test[2])
             error = True 
 
         elif p1 == False and p2 == False and p3 == False:
-            # print('Error is at the bit number: 4')
             test[3] = bit_switch(test[3])
             error = True
 
         elif p1 == False and p2 == True and p3 == True:
-            # print('Error is at the bit number: 5')
             test[4] = bit_switch(test[4])
             error = True
 
         elif p1 == True and p2 == False and p3 == True:
-            # print('Error is at the bit number: 6')
             test[5] = bit_switch(test[5])
 
         elif p1 == True and p2 == True and p3 == False:
-            # print('Error is at the bit number: 7')
             test[6] = bit_switch(test[6])
             error = True
 
         elif p1 == True and p2 == True and p3 == True:
-            # print('There are no errors in the string')
             error = False
             pass
     
@@ -262,22 +254,18 @@ def hamming_correct(string):
             error = True 
 
         elif p1 == False and p2 == True and p3 == True:
-            # print('Error is at the bit number: 4')
             test[3] = bit_switch(test[3])
             error = True
 
         elif p1 == True and p2 == False and p3 == True:
-            # print('Error is at the bit number: 5')
             test[4] = bit_switch(test[4])
             error = True
 
         elif p1 == True and p2 == True and p3 == False:
-            # print('Error is at the bit number: 6')
             test[5] = bit_switch(test[5])
             error = True
 
         elif p1 == True and p2 == True and p3 == True:
-            # print('There are no errors in the string')
             error = False
             pass
 
@@ -303,17 +291,14 @@ def hamming_correct(string):
             error = True 
 
         elif p1 == True and p2 == False and p3 == True:
-            # print('Error is at the bit number: 4')
             test[3] = bit_switch(test[3])
             error = True
 
         elif p1 == True and p2 == True and p3 == False:
-            # print('Error is at the bit number: 5')
             test[4] = bit_switch(test[4])
             error = True
 
         elif p1 == True and p2 == True and p3 == True:
-            # print('There are no errors in the string')
             error = False
             pass
 
@@ -351,13 +336,13 @@ def correct_string(string):
             with open(sequences_file_name, 'a') as f:
                 f.write(codeword_dna + ',' + corrected_codeword_binary + ',' + codeword_binary + ',' + '{}:{}\n'.format(i, i+(len(codeword_binary))))
 
-    return corrected_string, errors_count
+    return corrected_string, errors_count, sequences_file_name
 
 def remove_hamming_bits(data):
 
     data_without_parity = ''
-
     parity_count = 0
+
     for i in range(0, len(data), 7):
         binary_string = data[i:i+7]
         if len(binary_string) == 7:
@@ -374,7 +359,6 @@ def remove_hamming_bits(data):
             parity_count += 2
             
 
-    parity_count = parity_count 
     return data_without_parity, parity_count
 
 def binary_to_image_bytes(binary_data):
@@ -404,37 +388,37 @@ if __name__ == '__main__':
     print("\n\033[1;34m############################ Decoding Info ############################\033[0m")
     print("\033[1;35m# Input File Name:\033[0m \033[93m{}\033[0m".format(args.file_name))
     print("\033[1;35m# Output File Format:\033[0m \033[93m{}\033[0m".format(args.type))
-    print("\033[1;35m# File Size:\033[0m \033[93m{} bytes\033[0m".format(input_file_size))
+    print("\033[1;35m# Input File Size:\033[0m \033[93m{} bytes\033[0m".format(input_file_size))
     print("\033[1;35m# Huffman:\033[0m \033[93m{}\033[0m".format(args.Huffman))
     print("\033[1;35m# Error Correction Method:\033[0m \033[93mHamming\033[0m")
 
     with open(args.file_name, 'r', encoding='utf-8', newline='\r\n') as f:
         data = f.read()
 
-    corrected_data, errors_count = correct_string(data)
-    print("> Hamming correction has been applied.")
-    print("> The mutated and corrected sequences (if any), have been saved in the file: ")
+    corrected_data, errors_count, sequences_file_name = correct_string(data)
+    print("> Hamming correction was applied.")
+    print("> The mutated and corrected sequences (if any), were saved in the file: {}".format(sequences_file_name))
     data_without_parity, parity_count = remove_hamming_bits(corrected_data)
-    print("Hamming correction parity check bits were removed from the input file.")
+    print("> Hamming correction parity check bits were removed from the input file.")
+    print("> The number of the removed parity check bits: {} bits".format(parity_count))
 
     output_filename = args.output_filename + '.{}'.format(args.type)
     open(output_filename, 'w').close()
 
     if args.Huffman == True:
+        print("> Huffman compression is applied")
         header_len = decode_header(dna_to_binary(data_without_parity[:8]))  # Decode the marker length from the encoded data string
         instructions_length = decode_header(dna_to_binary(data_without_parity[8: (header_len + 1) * 8]))  # Decode the length of the instructions from the encoded data string
         huffman_instructions_string_binary = utf8_bin_decode(dna_to_binary(data_without_parity[(header_len + 1) * 8: ((header_len + 1) * 8 + instructions_length)]))  # Decode the Huffman instructions from the encoded data string
         huffman_dict = construct_huffman_dict(huffman_instructions_string_binary)  # Construct the Huffman dictionary from the Huffman instructions
         payload_decoded = huffman_decode(dna_to_binary(data_without_parity[(header_len + 1) * 8 + instructions_length:]), huffman_dict)  # Decode the data using Huffman decoding
-        
-        if args.type == 'txt':
+        print("> Huffman compressed data was decoded.")
 
+        if args.type == 'txt':
             with open(output_filename, 'w', encoding='utf-8') as f:
                 f.write(payload_decoded)
-            print("Data has been decoded and saved in the file: {}".format(output_filename))
 
         elif args.type == 'png' or args.type == 'jpg' or args.type == 'gz' or args.type == 'txt.gz':
-            
             with open(output_filename, 'wb') as bytes_file:
                 for i in range(0, len(payload_decoded), 3):
                     integer = int(payload_decoded[i:i+3])
@@ -446,12 +430,12 @@ if __name__ == '__main__':
         
         if args.type == 'txt':
             decoded_data = utf8_bin_decode(data_without_parity)
-
-            with open(output_filename, 'a') as f:
+            with open(output_filename, 'w') as f:
                 f.write(decoded_data)
         
         elif args.type == 'png' or args.type == 'jpg' or args.type == 'gz' or args.type == 'txt.gz': 
             decoded_data = binary_to_image_bytes(data_without_parity)
-    
             with open(output_filename, 'wb') as binary_file:
                 binary_file.write(decoded_data)
+
+    print("> Data has been decoded and saved in the file: {}".format(output_filename))
