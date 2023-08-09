@@ -393,7 +393,7 @@ if __name__ == '__main__':
     data_without_parity, parity_count = remove_hamming_bits(corrected_data)
     print("> Hamming correction parity check bits were removed from the input file.")
     print("> Number of the removed parity check bits: \033[1;32m{} bits\033[0m".format(parity_count))
-
+    print("> The sequence length after the removal of Hamming parity check bits: \033[1;32m{} DNA bases\033[0m".format(len(data_without_parity)))
     output_filename = args.output_filename + '.{}'.format(args.type)
     open(output_filename, 'w').close()
 
