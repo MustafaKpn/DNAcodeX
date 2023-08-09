@@ -1,5 +1,5 @@
 import argparse
-
+import os 
 
 ######################################### General Functions #########################################
 def utf8_bin(u):
@@ -53,7 +53,6 @@ def build_frequency_table(data):
             frequency_table[element] = 1  # Initialize the frequency of the symbol.
         else:
             frequency_table[element] += 1  # Increment the frequency of the symbol.
-    print("* Frequency table has been created.")
     return frequency_table
 
 def build_huffman_tree(frequency_table):
@@ -76,7 +75,6 @@ def build_huffman_tree(frequency_table):
         right_node = nodes.pop(0)  # Get the next node with the lowest frequency.
         parent_node = node(None, left_node.frequency + right_node.frequency, left_node, right_node)  # Create a parent node with the combined frequency.
         nodes.append(parent_node)  # Add the parent node back to the list of nodes.
-    print("* Huffman tree has been built.")
     return nodes[0]  # Return the root node of the Huffman tree.
 
 def build_huffman_codes(node, code='', huffman_codes=[]):
@@ -119,7 +117,6 @@ def huffman_encode(data):
     
     encoded_payload = ''.join([huffman_codes[symbol] for symbol in data])  # Encode the input data using the Huffman codes.
 
-    print("* The payload has been encoded into DNA bases using Huffman coding.")    
     return encoded_payload, huffman_codes
 
 def encode_huffman_instructions(huffman_codes):
@@ -138,12 +135,6 @@ def encode_huffman_instructions(huffman_codes):
 
     binary_string = utf8_bin(codes)
 
-    # table = binary_string.maketrans('10', 'GC')  # Create a translation table to convert '10' to 'GC'
-    # instructions_encoded = binary_string.translate(table)  # Apply the translation table to convert the binary representation to the encoded instructions
-    
-    # instructions_encoded = instructions_encoded.replace('CG', 'T')  # Replace 'CG' with 'T'
-    # instructions_encoded = instructions_encoded.replace('GC', 'A')  # Replace 'GC' with 'A'
-    
     return binary_string
 
 def encode_marker(instructions_string):
@@ -188,11 +179,6 @@ def read_chrs(file_name):
     data = ''
     for chr in read:
         data += chr
-        
-    if '\r' in data:
-        print('File contains carriage character')
-    else:
-        print("File doesn't contain carriage character")
         
     return data
 
@@ -246,19 +232,18 @@ def add_hamming(string):
 
 def add_hamming_to_string(string):
     codewords = ''
-    parity_counts = 0
+    parity_count = 0
 
     for i in range(0, len(string), 4):
         bits_string = string[i:i+4]
         codewords = codewords + add_hamming(bits_string)
 
         if len(bits_string) == 4 or len(bits_string) == 3 or len(bits_string) == 2:
-            parity_counts += 3
+            parity_count += 3
         elif len(bits_string) == 1:
-            parity_counts += 2
+            parity_count += 2
     
-    print('{} parity bits were added.'.format(parity_counts))
-    return codewords
+    return codewords, parity_count
 
 def file_to_binary(file_data):
     bytes_list = []
@@ -283,6 +268,13 @@ args = parser.parse_args()
 
 if __name__ == '__main__':
 
+    input_file_size = os.path.getsize('./{}'.format(args.file_name))
+    print("\n\033[1;34m############################ Encoding Info ############################\033[0m")
+    print("\033[1;35m# File Name:\033[0m \033[93m{}\033[0m".format(args.file_name))
+    print("\033[1;35m# File Format:\033[0m \033[93m{}\033[0m".format(args.type))
+    print("\033[1;35m# File Size:\033[0m \033[93m{} bytes\033[0m".format(input_file_size))
+    print("\033[1;35m# Huffman:\033[0m \033[93m{}\033[0m".format(args.Huffman))
+    print("\033[1;35m# Error Correction Method:\033[0m \033[93mHamming\033[0m")
     if args.Huffman == True:
         if args.type == 'txt':
             data = read_chrs(args.file_name)
@@ -308,14 +300,13 @@ if __name__ == '__main__':
         binary_data = marker_len[0] + encoded_marker + encoded_instructions + encoded_payload # Concatenate the marker length, marker, instructions, and data to form the final encoded string
         encoded_payload_bits = len(encoded_payload)
 
-        # print("\n\033[1;34m#################### Encoding Info ####################\033[0m")
-        # print("> Huffman compression is applied")
-        # print("> Space usage before Huffman encoding: \033[1;31m{}\033[0m bits".format(data_bits))
-        # print("> Space usage after Huffman encoding: \033[1;32m{}\033[0m bits".format(encoded_payload_bits))
-        # print("> Compression ratio: \033[1;32m{} %\033[0m".format(round((encoded_payload_bits)/data_bits * 100, 3)))
-        # print("> GC-content of the file: {} %".format(gc_counter(binary_data)))
-        # # print("\n> Full length of the encoded file: \033[1;32m{}\033[0m DNA bases".format((len(dna_mapped_data))))  # Print the length of the encoded string
-        # # print("> Ratio of decoding information to the full encoded data: \033[1;32m{} %\033[0m".format(round((len(marker_len) + len(encoded_marker) + len(encoded_instructions))/len(encoded_string)*100, 3)))
+        print("\n\033[1;32m> Huffman compression was applied\033[0m")
+        print("> Space usage BEFORE Huffman compression: \033[1;31m{} bits\033[0m".format(input_file_size * 8))
+        print("> Space usage AFTER Huffman compression (payload): \033[1;32m{} bits\033[0m".format(encoded_payload_bits))
+        print("> Space usage AFTER Huffman compression (payload + header): \033[1;32m{} bits\033[0m".format(len(binary_data)))
+
+        print("> Compression ratio (payload): \033[1;32m{} %\033[0m".format(round((encoded_payload_bits)/data_bits * 100, 3)))  
+        print("> Ratio of decoding information to the full encoded data: \033[1;32m{} %\033[0m".format(round((len(marker_len) + len(encoded_marker) + len(encoded_instructions))/len(binary_data)*100, 3)))
             
 
             
@@ -331,12 +322,15 @@ if __name__ == '__main__':
                 read = f.read()
             binary_data = file_to_binary(read)
             suffix = '_{}.txt'.format(args.type)
+        print("\n\033[1;31m> Huffman compression was NOT applied\033[0m")
 
-    binary_data_hamming = add_hamming_to_string(binary_data)
+    binary_data_hamming, parity_count = add_hamming_to_string(binary_data)
     output_data = map_to_dna(binary_data_hamming)
-
+    print("> Hamming correction parity check bits were added to the sequence.")
+    print('> The number of Hamming parity bits that were added: \033[1;32m{} bits\033[0m'.format(parity_count))
+    print("> GC-content of the full sequence: \033[1;32m{} %\033[0m".format(gc_counter(output_data)))
+    print("> Full length of the sequence: \033[1;32m{} DNA bases\033[0m".format(len(output_data)))
     output_filename = args.output_filename + suffix
     with open(output_filename, 'w') as f:
         f.write(output_data)
-    print("\n> Note: DNA encoded data was saved in the \033[1;36m{}\033[0m".format(output_filename))
-    
+    print("> DNA encoded data was saved in the file: \033[1;36m{}\033[0m\n".format(output_filename))
