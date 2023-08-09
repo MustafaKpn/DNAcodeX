@@ -25,8 +25,7 @@ def utf8_bin_decode(string):
                 bit = bit.to_bytes((bit.bit_length() + 7) // 8, 'big').decode('utf-8')
                 decoded_string += bit 
             except:
-                pass
-            # decoded_string += bit    
+                pass    
 
         elif string.startswith('110'):
             f = string[0:16]
@@ -132,22 +131,15 @@ def huffman_decode(encoded_data, huffman_codes):
     inverse_codes = {value: key for key, value in huffman_codes.items()}  # Create a dictionary of inverse codes (codes as keys and characters as values)
     current_code = ''  # Initialize an empty string to store the current code being processed
     decoded_data = ''  # Initialize an empty string to store the decoded data
-    # open(file_name, 'w').close()
-    # print('{} was created'.format(file_name))
 
     for bit in encoded_data:
         current_code += bit
-        # print('Checking if code is in Huffman dictionary')
         if current_code in inverse_codes:
-            # print('Code was found in the Huffman dictionary')
-            # print('Adding the Huffman code to the file')
             decoded_data += inverse_codes[current_code]  # Append the decoded character to the decoded data
-            # with open(file_name, 'a') as f:
-            #     f.write(inverse_codes[current_code])
             current_code = ''  # Reset the current code
         else:
-            # print('code passed')
             continue
+        
     return decoded_data
 
 def read_file(file_name):
