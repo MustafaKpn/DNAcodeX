@@ -305,10 +305,7 @@ def hamming_correct(string):
     
     return corrected_string, error
 
-def correct_string(string):
-
-    current_time = datetime.datetime.now()
-    formatted_time = current_time.strftime("%Y%m%d%H%M%S")
+def correct_string(string, formatted_time):
 
     corrected_string = ''
     errors_count = 0
@@ -378,6 +375,8 @@ if __name__ == '__main__':
         data = f.read()
 
     input_file_size = os.path.getsize('./{}'.format(args.file_name))
+    current_time = datetime.datetime.now()
+    formatted_time = current_time.strftime("%Y%m%d%H%M%S")
 
     print("\n\033[1;34m############################ Decoding Info ############################\033[0m")
     print("\033[1;35m# Input File Name:\033[0m \033[93m{}\033[0m".format(args.file_name))
@@ -386,7 +385,7 @@ if __name__ == '__main__':
     print("\033[1;35m# Huffman:\033[0m \033[93m{}\033[0m".format(args.Huffman))
     print("\033[1;35m# Error Correction Method:\033[0m \033[93mHamming\033[0m")
 
-    corrected_data, errors_count, sequences_file_name = correct_string(data)
+    corrected_data, errors_count, sequences_file_name = correct_string(data, formatted_time)
     print("\n> Hamming correction was applied.")
     print("> Number of errors detected and corrected: \033[1;31m{}\033[0m".format(errors_count))
     print("> The mutated and corrected sequences (if any), were saved in the file: \033[1;36m{}\033[0m".format(sequences_file_name))
@@ -429,6 +428,10 @@ if __name__ == '__main__':
             decoded_data = binary_to_image_bytes(data_without_parity)
             with open(output_filename, 'wb') as binary_file:
                 binary_file.write(decoded_data)
+
     output_file_size = os.path.getsize('./{}'.format(output_filename))
+    with open('DNAcodeX_decoding_INFO.csv', 'a') as f:
+        f.write(args.file_name + '_{}'.format(formatted_time) + ',' + errors_count + ',' + len(data) + ',' + parity_count + ',' + len(data_without_parity) + ',' + output_file_size)
+    
     print("> Final output file size: \033[1;32m{} bytes\033[0m".format(output_file_size))
     print("> Data has been decoded and saved in the file: \033[1;36m{}\033[0m\n".format(output_filename))
