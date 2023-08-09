@@ -431,7 +431,7 @@ if __name__ == '__main__':
 
     output_file_size = os.path.getsize('./{}'.format(output_filename))
     with open('DNAcodeX_decoding_INFO.csv', 'a') as f:
-        f.write(args.file_name + '_{}'.format(formatted_time) + ',' + errors_count + ',' + len(data) + ',' + parity_count + ',' + len(data_without_parity) + ',' + output_file_size)
+        f.write(args.file_name + ',' + formatted_time + ',' + str(errors_count) + ',' + str(len(data)) + ',' + str(parity_count) + ',' + str(len(data_without_parity)) + ',' + str(output_file_size) + '\n')
     
     print("> Final output file size: \033[1;32m{} bytes\033[0m".format(output_file_size))
     print("> Data has been decoded and saved in the file: \033[1;36m{}\033[0m\n".format(output_filename))
