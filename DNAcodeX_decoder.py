@@ -139,7 +139,7 @@ def huffman_decode(encoded_data, huffman_codes):
             current_code = ''  # Reset the current code
         else:
             continue
-        
+
     return decoded_data
 
 def read_file(file_name):
@@ -313,7 +313,7 @@ def correct_string(string):
     corrected_string = ''
     errors_count = 0
 
-    sequences_file_name = 'Hamming_corrected_sequences_{}.csv'.format(formatted_time)
+    sequences_file_name = 'DNAcodeX_corrected_seqs_{}.csv'.format(formatted_time)
     open(sequences_file_name, 'w').close()
     
     for i in range(0, len(string), 7):
@@ -374,30 +374,31 @@ parser.add_argument('-o', '--output_filename', required=True, default='decoded_d
 args = parser.parse_args()
 
 if __name__ == '__main__':
-
-    input_file_size = os.path.getsize('./{}'.format(args.file_name))
-    print("\n\033[1;34m############################ Decoding Info ############################\033[0m")
-    print("\033[1;35m# Input File Name:\033[0m \033[93m{}\033[0m".format(args.file_name))
-    print("\033[1;35m# Output File Format:\033[0m \033[93m{}\033[0m".format(args.type))
-    print("\033[1;35m# Input File Size:\033[0m \033[93m{} bytes\033[0m".format(input_file_size))
-    print("\033[1;35m# Huffman:\033[0m \033[93m{}\033[0m".format(args.Huffman))
-    print("\033[1;35m# Error Correction Method:\033[0m \033[93mHamming\033[0m")
-
     with open(args.file_name, 'r', encoding='utf-8', newline='\r\n') as f:
         data = f.read()
 
+    input_file_size = os.path.getsize('./{}'.format(args.file_name))
+
+    print("\n\033[1;34m############################ Decoding Info ############################\033[0m")
+    print("\033[1;35m# Input File Name:\033[0m \033[93m{}\033[0m".format(args.file_name))
+    print("\033[1;35m# Input Sequence Length:\033[0m \033[93m{} DNA bases\033[0m".format(len(data)))
+    print("\033[1;35m# Output File Format:\033[0m \033[93m{}\033[0m".format(args.type))
+    print("\033[1;35m# Huffman:\033[0m \033[93m{}\033[0m".format(args.Huffman))
+    print("\033[1;35m# Error Correction Method:\033[0m \033[93mHamming\033[0m")
+
     corrected_data, errors_count, sequences_file_name = correct_string(data)
-    print("> Hamming correction was applied.")
-    print("> The mutated and corrected sequences (if any), were saved in the file: {}".format(sequences_file_name))
+    print("\n> Hamming correction was applied.")
+    print("> Number of errors detected and corrected: \033[1;31m{}\033[0m".format(errors_count))
+    print("> The mutated and corrected sequences (if any), were saved in the file: \033[1;36m{}\033[0m".format(sequences_file_name))
     data_without_parity, parity_count = remove_hamming_bits(corrected_data)
     print("> Hamming correction parity check bits were removed from the input file.")
-    print("> The number of the removed parity check bits: {} bits".format(parity_count))
+    print("> Number of the removed parity check bits: \033[1;32m{} bits\033[0m".format(parity_count))
 
     output_filename = args.output_filename + '.{}'.format(args.type)
     open(output_filename, 'w').close()
 
     if args.Huffman == True:
-        print("> Huffman compression is applied")
+        print("\033[1;32m> Huffman compression is applied\033[0m")
         header_len = decode_header(dna_to_binary(data_without_parity[:8]))  # Decode the marker length from the encoded data string
         instructions_length = decode_header(dna_to_binary(data_without_parity[8: (header_len + 1) * 8]))  # Decode the length of the instructions from the encoded data string
         huffman_instructions_string_binary = utf8_bin_decode(dna_to_binary(data_without_parity[(header_len + 1) * 8: ((header_len + 1) * 8 + instructions_length)]))  # Decode the Huffman instructions from the encoded data string
@@ -418,7 +419,7 @@ if __name__ == '__main__':
 
     
     elif args.Huffman == False:
-        
+        print("\033[1;31m> Huffman compression is NOT applied\033[0m")
         if args.type == 'txt':
             decoded_data = utf8_bin_decode(data_without_parity)
             with open(output_filename, 'w') as f:
@@ -429,4 +430,4 @@ if __name__ == '__main__':
             with open(output_filename, 'wb') as binary_file:
                 binary_file.write(decoded_data)
 
-    print("> Data has been decoded and saved in the file: {}".format(output_filename))
+    print("> Data has been decoded and saved in the file: \033[1;36m{}\033[0m\n".format(output_filename))
