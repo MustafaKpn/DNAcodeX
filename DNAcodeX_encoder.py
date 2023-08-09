@@ -305,7 +305,7 @@ if __name__ == '__main__':
         print("> Space usage AFTER Huffman compression (payload): \033[1;32m{} bits\033[0m".format(encoded_payload_bits))
         print("> Space usage AFTER Huffman compression (payload + header): \033[1;32m{} bits\033[0m".format(len(binary_data)))
 
-        print("> Compression ratio (payload): \033[1;32m{} %\033[0m".format(round((encoded_payload_bits)/data_bits * 100, 3)))  
+        print("> Compression ratio (payload): \033[1;32m{} %\033[0m".format(round((encoded_payload_bits)/(input_file_size * 8) * 100, 3)))  
         print("> Ratio of decoding information to the full encoded data: \033[1;32m{} %\033[0m".format(round((len(marker_len) + len(encoded_marker) + len(encoded_instructions))/len(binary_data)*100, 3)))
             
 
