@@ -132,7 +132,6 @@ def huffman_decode(encoded_data, huffman_codes):
     inverse_codes = {value: key for key, value in huffman_codes.items()}  # Create a dictionary of inverse codes (codes as keys and characters as values)
     current_code = ''  # Initialize an empty string to store the current code being processed
     decoded_data = ''  # Initialize an empty string to store the decoded data
-    print(inverse_codes)
     # open(file_name, 'w').close()
     # print('{} was created'.format(file_name))
 
