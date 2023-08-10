@@ -1,4 +1,5 @@
 import argparse
+import datetime
 import os 
 
 ######################################### General Functions #########################################
@@ -269,6 +270,9 @@ args = parser.parse_args()
 if __name__ == '__main__':
 
     input_file_size = os.path.getsize('./{}'.format(args.file_name))
+    current_time = datetime.datetime.now()
+    formatted_time = current_time.strftime("%Y%m%d%H%M%S")
+
     print("\n\033[1;34m############################# Encoding Info #############################\033[0m")
     print("\033[1;35m# File Name:\033[0m \033[93m{}\033[0m".format(args.file_name))
     print("\033[1;35m# File Format:\033[0m \033[93m{}\033[0m".format(args.type))
@@ -298,15 +302,18 @@ if __name__ == '__main__':
         encoded_marker, len_instructions_len = encode_marker(encoded_instructions)  # Encode the length of the instructions to obtain the marker and length of instructions
         marker_len = encode_marker(len_instructions_len)  # Encode the length of the instructions length to obtain the marker length
         binary_data = marker_len[0] + encoded_marker + encoded_instructions + encoded_payload # Concatenate the marker length, marker, instructions, and data to form the final encoded string
+        
         encoded_payload_bits = len(encoded_payload)
+        compression_ratio = round((encoded_payload_bits)/(input_file_size * 8) * 100, 3)
+        decoding_info_ratio = round((len(marker_len) + len(encoded_marker) + len(encoded_instructions))/len(binary_data)*100, 3)
 
         print("\n\033[1;32m> Huffman compression was applied\033[0m")
         print("> Space usage BEFORE Huffman compression: \033[1;31m{} bits\033[0m".format(input_file_size * 8))
         print("> Space usage AFTER Huffman compression (payload): \033[1;32m{} bits\033[0m".format(encoded_payload_bits))
         print("> Space usage AFTER Huffman compression (payload + header): \033[1;32m{} bits\033[0m".format(len(binary_data)))
 
-        print("> Compression ratio (payload): \033[1;32m{} %\033[0m".format(round((encoded_payload_bits)/(input_file_size * 8) * 100, 3)))  
-        print("> Ratio of decoding information to the full encoded data: \033[1;32m{} %\033[0m".format(round((len(marker_len) + len(encoded_marker) + len(encoded_instructions))/len(binary_data)*100, 3)))
+        print("> Compression ratio (payload): \033[1;32m{} %\033[0m".format(compression_ratio))  
+        print("> Ratio of decoding information to the full encoded data: \033[1;32m{} %\033[0m".format(decoding_info_ratio))
             
 
             
@@ -324,6 +331,9 @@ if __name__ == '__main__':
             suffix = '_{}.txt'.format(args.type)
         print("\n\033[1;31m> Huffman compression was NOT applied\033[0m")
 
+        compression_ratio = 0
+        decoding_info_ratio = 0
+
     binary_data_hamming, parity_count = add_hamming_to_string(binary_data)
     output_data = map_to_dna(binary_data_hamming)
     print("> Hamming correction parity check bits were added to the sequence.")
@@ -332,6 +342,16 @@ if __name__ == '__main__':
     print("> GC-content of the full sequence: \033[1;32m{} %\033[0m".format(gc_counter(output_data)))
     print("> Full length of the sequence: \033[1;32m{} DNA bases\033[0m".format(len(output_data)))
     output_filename = args.output_filename + suffix
+
+    if os.path.exists('./DNAcodeX_encoding_INFO.csv'):
+        pass
+    else:
+        with open('DNAcodeX_encoding_INFO.csv', 'w') as f:
+            f.write('Input File,ID(DateTime),Huffman,Size Before Compression (bits),Size AFter Compression (bits),Compression Ratio (payload)(%),Hamming Parity Bits Count,Parity Check Ratio (%),Output Sequence Length(DNA bases)\n')
+    
+    with open('DNAcodeX_encoding_INFO.csv', 'a') as f:
+        f.write(args.file_name + ',' + formatted_time + ',' + str(args.Huffman) + ',' + str(input_file_size * 8) + ',' + str(len(binary_data)) + ',' + str(compression_ratio) + ',' + str(parity_count) + ',' + str(round(parity_count/len(output_data) * 100)) + ',' + str(len(output_data)) + '\n')
+ 
     with open(output_filename, 'w') as f:
         f.write(output_data)
     print("> DNA encoded data was saved in the file: \033[1;36m{}\033[0m\n".format(output_filename))
