@@ -430,6 +430,13 @@ if __name__ == '__main__':
                 binary_file.write(decoded_data)
 
     output_file_size = os.path.getsize('./{}'.format(output_filename))
+    
+    if os.path.exists('./DNAcodeX_decoding_INFO.csv'):
+        pass
+    else:
+        with open('DNAcodeX_decoding_INFO.csv', 'w') as f:
+            f.write('Input File,ID(DateTime),Errors Count,Length of Input Sequence,Removed Parity Bits,Length of Sequence After Parity Bits Removal,Output File Size (bytes)\n')
+    
     with open('DNAcodeX_decoding_INFO.csv', 'a') as f:
         f.write(args.file_name + ',' + formatted_time + ',' + str(errors_count) + ',' + str(len(data)) + ',' + str(parity_count) + ',' + str(len(data_without_parity)) + ',' + str(output_file_size) + '\n')
     
