@@ -269,7 +269,7 @@ args = parser.parse_args()
 if __name__ == '__main__':
 
     input_file_size = os.path.getsize('./{}'.format(args.file_name))
-    print("\n\033[1;34m############################ Encoding Info ############################\033[0m")
+    print("\n\033[1;34m############################# Encoding Info #############################\033[0m")
     print("\033[1;35m# File Name:\033[0m \033[93m{}\033[0m".format(args.file_name))
     print("\033[1;35m# File Format:\033[0m \033[93m{}\033[0m".format(args.type))
     print("\033[1;35m# File Size:\033[0m \033[93m{} bytes\033[0m".format(input_file_size))
@@ -328,6 +328,7 @@ if __name__ == '__main__':
     output_data = map_to_dna(binary_data_hamming)
     print("> Hamming correction parity check bits were added to the sequence.")
     print('> The number of Hamming parity bits that were added: \033[1;32m{} bits\033[0m'.format(parity_count))
+    print("> The ratio of parity check bits to the full length of the sequence: \033[1;32m{} %\033[0m".format(round(parity_count/len(output_data) * 100)))
     print("> GC-content of the full sequence: \033[1;32m{} %\033[0m".format(gc_counter(output_data)))
     print("> Full length of the sequence: \033[1;32m{} DNA bases\033[0m".format(len(output_data)))
     output_filename = args.output_filename + suffix
