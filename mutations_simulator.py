@@ -389,7 +389,6 @@ parser.add_argument('-m', '--mutations_rate', required=True, metavar='', type=fl
 parser.add_argument('-huffman', '--Huffman', required=False, action='store_true', help='To be called if the input file is compressed using Huffman algorithm.')
 parser.add_argument('-t', '--type', required=True, choices=['jpg', 'jpeg', 'png', 'txt', 'gz', 'txt.gz'], metavar='', help='The format of the file you are decoding.')
 parser.add_argument('-n', '--n_sims', required=True, type=int, metavar='')
-parser.add_argument('-o', '--output_file', required=False, default='data_decoded', type=str)
 
 args = parser.parse_args()
 if __name__ == '__main__':
@@ -397,28 +396,28 @@ if __name__ == '__main__':
     with open(args.input_file, 'r', encoding='utf-8', newline='\r\n') as f:
         data = f.read()
 
-    output_filename = args.output_file + '.{}'.format(args.type)
-    unmutated_file_size = run_code(data, args.Huffman, args.type, output_filename)
+    unmutated_md5sum = run_code(data, args.Huffman, args.type)
     
     number_of_run = 0
-
     for i in range(0, args.n_sims, 1):
         mutated_data = simulate_substitution(data, args.mutations_rate)
-        mutated_output_file_size = run_code(mutated_data, args.Huffman, args.type, output_filename)
+        mutated_md5sum = run_code(mutated_data, args.Huffman, args.type)
         number_of_run += 1
+
         print('Run: {}'.format(number_of_run))
-        retrieval_per = mutated_output_file_size/unmutated_file_size * 100
         if os.path.exists('./Mutations_simulator_report.csv'):
             pass
         else:
             with open('Mutations_simulator_report.csv', 'w') as f:
-                f.write('Input File,Run Number,Mutations Rate (%),Data Retrieval Percentage (%)\n')
+                f.write('Input File,Run Number,Mutations Rate (%),Perfect Retrieval\n')
         
+        if unmutated_md5sum == mutated_md5sum:
+            check = 1
+        else: 
+            check = 0
+
         with open('Mutations_simulator_report.csv', 'a') as f:
-            f.write(args.input_file + ',' + str(number_of_run) + ',' + str(args.mutations_rate) + ',' + str(retrieval_per) + '\n')
-        
-    print("> Final output file size: \033[1;32m{} bytes\033[0m".format(unmutated_file_size))
-    print("> Data has been decoded and saved in the file: \033[1;36m{}\033[0m\n".format(output_filename))
+            f.write(args.input_file + ',' + str(number_of_run) + ',' + str(args.mutations_rate) + ',' + str(check) + '\n')
 
 else:
     pass
