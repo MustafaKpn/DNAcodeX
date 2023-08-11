@@ -101,13 +101,11 @@ def construct_huffman_dict(instructions_string):
     if instructions_string.find(',,') != -1:  # Check if multiple sets of codes are present
         codes_list = instructions_string.split(',,')  # Split the instructions into separate code sets
         codes_list1 = codes_list[0].split(',')  # Split the first set of codes
-        for code in codes_list1:
-            codes.append(code)
+        codes = [code for code in codes_list1]
 
         codes_list2 = codes_list[1].split(',')  # Split the second set of codes
         codes_list2[0] = ',' + codes_list2[0]
-        for code in codes_list2:
-            codes.append(code)
+        codes = [code for code in codes_list2]
     else:
         codes = instructions_string[1:].split(',')  # Split the codes if only one set is present
 
