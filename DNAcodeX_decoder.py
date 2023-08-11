@@ -214,10 +214,6 @@ def hamming_correct(string):
         elif p1 == True and p2 == True and p3 == False:
             bits[6] = bit_switch(bits[6])
             error = True
-
-        elif p1 == True and p2 == True and p3 == True:
-            error = False
-            pass
     
     elif len(bits) == 6:
         parity_indices = [(0, 1), (1, 2), (0, 2)]
@@ -251,10 +247,6 @@ def hamming_correct(string):
             bits[5] = bit_switch(bits[5])
             error = True
 
-        elif p1 == True and p2 == True and p3 == True:
-            error = False
-            pass
-
     elif len(bits) == 5:
         x1 = bit_switch(bits[0])
         x2 = bit_switch(bits[1])
@@ -284,17 +276,10 @@ def hamming_correct(string):
             bits[4] = bit_switch(bits[4])
             error = True
 
-        elif p1 == True and p2 == True and p3 == True:
-            error = False
-            pass
-
     elif len(bits) == 3:
         if bits[0] != max(set(bits), key = bits.count):
             bits[0] = max(set(bits), key = bits.count)
             error = True
-        else:
-            error = False
-            pass
 
     corrected_string = ''.join([str(i) for i in bits])
     return corrected_string, error
