@@ -312,16 +312,18 @@ def remove_hamming_bits(data):
 
     for i in range(0, len(data), 7):
         binary_string = data[i:i+7]
-        if len(binary_string) == 7:
+        length = len(binary_string)
+
+        if length == 7:
             data_without_parity += data[i:i+4]
             parity_count += 3
-        elif len(binary_string) == 6:
+        elif length == 6:
             data_without_parity += data[i:i+3]
             parity_count += 3
-        elif len(binary_string) == 5:
+        elif length == 5:
             data_without_parity += data[i:i+2]
             parity_count += 3
-        elif len(binary_string) == 3:
+        elif length == 3:
             data_without_parity += data[i:i+1]
             parity_count += 2
             
