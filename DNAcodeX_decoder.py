@@ -101,11 +101,13 @@ def construct_huffman_dict(instructions_string):
     if instructions_string.find(',,') != -1:  # Check if multiple sets of codes are present
         codes_list = instructions_string.split(',,')  # Split the instructions into separate code sets
         codes_list1 = codes_list[0].split(',')  # Split the first set of codes
-        codes = [code for code in codes_list1]
+        for code in codes_list1:
+            codes.append(code)
 
         codes_list2 = codes_list[1].split(',')  # Split the second set of codes
         codes_list2[0] = ',' + codes_list2[0]
-        codes = [code for code in codes_list2]
+        for code in codes_list2:
+            codes.append(code)
     else:
         codes = instructions_string[1:].split(',')  # Split the codes if only one set is present
 
@@ -175,111 +177,132 @@ def bit_switch(bit):
         return 1
     
 def hamming_correct(string):
-    bits = [int(i) for i in string]
-    error = False
+    test = []
+    for i in string:
+        test.append(int(i))
 
-    if len(bits) == 7:
-        parity_indices = [(0, 1, 3), (0, 2, 3), (1, 2, 3)]
-        parities = [bits[i] ^ bits[j] ^ bits[k] for i, j, k in parity_indices]
+    if len(test) == 7:
+        x1 = test[0] ^ test[1] ^ test[3]
+        x2 = test[0] ^ test[2] ^ test[3]
+        x3 = test[1] ^ test[2] ^ test[3]
 
-        p1 = parities[0] == bits[4]
-        p2 = parities[1] == bits[5]
-        p3 = parities[2] == bits[6]
+        p1 = x1 == test[4]
+        p2 = x2 == test[5]
+        p3 = x3 == test[6]
+
+        error = False
 
         if p1 == False and p2 == False and p3 == True:
-            bits[0] = bit_switch(bits[0])
+            test[0] = bit_switch(test[0])
             error = True
 
         elif p1 == False and p2 == True and p3 == False:
-            bits[1] = bit_switch(bits[1])
+            test[1] = bit_switch(test[1])
             error = True
 
         elif p1 == True and p2 == False and p3 == False:
-            bits[2] = bit_switch(bits[2])
+            test[2] = bit_switch(test[2])
             error = True 
 
         elif p1 == False and p2 == False and p3 == False:
-            bits[3] = bit_switch(bits[3])
+            test[3] = bit_switch(test[3])
             error = True
 
         elif p1 == False and p2 == True and p3 == True:
-            bits[4] = bit_switch(bits[4])
+            test[4] = bit_switch(test[4])
             error = True
 
         elif p1 == True and p2 == False and p3 == True:
-            bits[5] = bit_switch(bits[5])
+            test[5] = bit_switch(test[5])
 
         elif p1 == True and p2 == True and p3 == False:
-            bits[6] = bit_switch(bits[6])
+            test[6] = bit_switch(test[6])
             error = True
-    
-    elif len(bits) == 6:
-        parity_indices = [(0, 1), (1, 2), (0, 2)]
-        parities = [bits[i] ^ bits[j] for i, j in parity_indices]
 
-        p1 = parities[0] == bits[3]
-        p2 = parities[1] == bits[4]
-        p3 = parities[2] == bits[5]
+        elif p1 == True and p2 == True and p3 == True:
+            error = False
+            pass
+    
+    elif len(test) == 6:
+        x1 = test[0] ^ test[1]
+        x2 = test[1] ^ test[2]
+        x3 = test[0] ^ test[2]
+
+        p1 = x1 == test[3]
+        p2 = x2 == test[4]
+        p3 = x3 == test[5]
 
         if p1 == False and p2 == True and p3 == False:
-            bits[0] = bit_switch(bits[0])
+            test[0] = bit_switch(test[0])
             error = True
 
         elif p1 == False and p2 == False and p3 == True:
-            bits[1] = bit_switch(bits[1])
+            test[1] = bit_switch(test[1])
             error = True
 
         elif p1 == False and p2 == False and p3 == True:
-            bits[2] = bit_switch(bits[2])
+            test[2] = bit_switch(test[2])
             error = True 
 
         elif p1 == False and p2 == True and p3 == True:
-            bits[3] = bit_switch(bits[3])
+            test[3] = bit_switch(test[3])
             error = True
 
         elif p1 == True and p2 == False and p3 == True:
-            bits[4] = bit_switch(bits[4])
+            test[4] = bit_switch(test[4])
             error = True
 
         elif p1 == True and p2 == True and p3 == False:
-            bits[5] = bit_switch(bits[5])
+            test[5] = bit_switch(test[5])
             error = True
 
-    elif len(bits) == 5:
-        x1 = bit_switch(bits[0])
-        x2 = bit_switch(bits[1])
-        x3 = bits[0] ^ bits[1]
+        elif p1 == True and p2 == True and p3 == True:
+            error = False
+            pass
 
-        p1 = x1 == bits[2]
-        p2 = x2 == bits[3]
-        p3 = x3 == bits[4]
+    elif len(test) == 5:
+        x1 = bit_switch(test[0])
+        x2 = bit_switch(test[1])
+        x3 = test[0] ^ test[1]
+
+        p1 = x1 == test[2]
+        p2 = x2 == test[3]
+        p3 = x3 == test[4]
 
         if p1 == False and p2 == True and p3 == False:
-            bits[0] = bit_switch(bits[0])
+            test[0] = bit_switch(test[0])
             error = True
 
         elif p1 == True and p2 == False and p3 == False:
-            bits[1] = bit_switch(bits[1])
+            test[1] = bit_switch(test[1])
             error = True
 
         elif p1 == False and p2 == True and p3 == True:
-            bits[2] = bit_switch(bits[2])
+            test[2] = bit_switch(test[2])
             error = True 
 
         elif p1 == True and p2 == False and p3 == True:
-            bits[3] = bit_switch(bits[3])
+            test[3] = bit_switch(test[3])
             error = True
 
         elif p1 == True and p2 == True and p3 == False:
-            bits[4] = bit_switch(bits[4])
+            test[4] = bit_switch(test[4])
             error = True
 
-    elif len(bits) == 3:
-        if bits[0] != max(set(bits), key = bits.count):
-            bits[0] = max(set(bits), key = bits.count)
-            error = True
+        elif p1 == True and p2 == True and p3 == True:
+            error = False
+            pass
 
-    corrected_string = ''.join([str(i) for i in bits])
+    elif len(test) == 3:
+        if test[0] != max(set(test), key = test.count):
+            test[0] = max(set(test), key = test.count)
+            error = True
+        else:
+            error = False
+            pass
+
+    corrected_string = ''.join([str(i) for i in test])
+    
     return corrected_string, error
 
 def correct_string(string, formatted_time):
@@ -310,18 +333,16 @@ def remove_hamming_bits(data):
 
     for i in range(0, len(data), 7):
         binary_string = data[i:i+7]
-        length = len(binary_string)
-
-        if length == 7:
+        if len(binary_string) == 7:
             data_without_parity += data[i:i+4]
             parity_count += 3
-        elif length == 6:
+        elif len(binary_string) == 6:
             data_without_parity += data[i:i+3]
             parity_count += 3
-        elif length == 5:
+        elif len(binary_string) == 5:
             data_without_parity += data[i:i+2]
             parity_count += 3
-        elif length == 3:
+        elif len(binary_string) == 3:
             data_without_parity += data[i:i+1]
             parity_count += 2
             
