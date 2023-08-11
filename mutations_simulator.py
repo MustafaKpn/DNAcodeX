@@ -283,13 +283,10 @@ def hamming_correct(string):
     corrected_string = ''.join([str(i) for i in bits])
     return corrected_string, error
 
-def correct_string(string, formatted_time):
+def correct_string(string):
 
     corrected_string = ''
     errors_count = 0
-
-    sequences_file_name = 'DNAcodeX_corrected_seqs_{}.csv'.format(formatted_time)
-    open(sequences_file_name, 'w').close()
     
     for i in range(0, len(string), 7):
         codeword_dna = string[i:i+7]
@@ -299,10 +296,8 @@ def correct_string(string, formatted_time):
 
         if error == True:
             errors_count += 1
-            with open(sequences_file_name, 'a') as f:
-                f.write(codeword_dna + ',' + corrected_codeword_binary + ',' + codeword_binary + ',' + '{}:{}\n'.format(i, i+(len(codeword_binary))))
 
-    return corrected_string, errors_count, sequences_file_name
+    return corrected_string, errors_count
 
 def remove_hamming_bits(data):
 
