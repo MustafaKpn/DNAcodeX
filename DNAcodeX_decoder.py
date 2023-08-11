@@ -180,13 +180,12 @@ def hamming_correct(string):
     bits = [int(i) for i in string]
 
     if len(bits) == 7:
-        x1 = bits[0] ^ bits[1] ^ bits[3]
-        x2 = bits[0] ^ bits[2] ^ bits[3]
-        x3 = bits[1] ^ bits[2] ^ bits[3]
-
-        p1 = x1 == bits[4]
-        p2 = x2 == bits[5]
-        p3 = x3 == bits[6]
+        parity_indices = [(0, 1, 3), (0, 2, 3), (1, 2, 3)]
+        parities = [bits[i] ^ bits[j] ^ bits[k] for i, j, k in parity_indices]
+        
+        p1 = parities[0] == bits[4]
+        p2 = parities[1] == bits[5]
+        p3 = parities[2] == bits[6]
 
         error = False
 
@@ -222,13 +221,12 @@ def hamming_correct(string):
             pass
     
     elif len(bits) == 6:
-        x1 = bits[0] ^ bits[1]
-        x2 = bits[1] ^ bits[2]
-        x3 = bits[0] ^ bits[2]
+        parity_indices = [(0, 1), (1, 2), (0, 2)]
+        parities = [bits[i] ^ bits[j] for i, j in parity_indices]
 
-        p1 = x1 == bits[3]
-        p2 = x2 == bits[4]
-        p3 = x3 == bits[5]
+        p1 = parities[0] == bits[3]
+        p2 = parities[1] == bits[4]
+        p3 = parities[2] == bits[5]
 
         if p1 == False and p2 == True and p3 == False:
             bits[0] = bit_switch(bits[0])
