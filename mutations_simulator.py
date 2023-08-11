@@ -353,51 +353,34 @@ def simulate_substitution(sequence, mutation_rate):
     mutated_sequence = ''.join(sequence)
     return mutated_sequence
 
-def run_code(data, huffman, type, output):
+def run_code(data, huffman, type):
 
-    corrected_data = correct_string(data, str(11))[0]
-    data_without_parity, parity_count = remove_hamming_bits(corrected_data)
+    corrected_data, errors_count = correct_string(data)
+    data_without_parity = remove_hamming_bits(corrected_data)[0]
 
     if huffman == True:
-        print("\033[1;32m> Huffman compression is applied\033[0m")
         header_len = decode_header(dna_to_binary(data_without_parity[:8]))  # Decode the marker length from the encoded data string
         instructions_length = decode_header(dna_to_binary(data_without_parity[8: (header_len + 1) * 8]))  # Decode the length of the instructions from the encoded data string
         huffman_instructions_string_binary = utf8_bin_decode(dna_to_binary(data_without_parity[(header_len + 1) * 8: ((header_len + 1) * 8 + instructions_length)]))  # Decode the Huffman instructions from the encoded data string
         huffman_dict = construct_huffman_dict(huffman_instructions_string_binary)  # Construct the Huffman dictionary from the Huffman instructions
         decoded_data = huffman_decode(dna_to_binary(data_without_parity[(header_len + 1) * 8 + instructions_length:]), huffman_dict)  # Decode the data using Huffman decoding
-        print("> Huffman compressed data was decoded.")
 
-        if type == 'txt':
-            with open(output, 'w', encoding='utf-8') as f:
-                f.write(decoded_data)  
                             
     elif type == 'png' or type == 'jpg' or type == 'gz' or type == 'txt.gz':
-        with open(output, 'wb') as bytes_file:
-            for i in range(0, len(decoded_data), 3):
-                integer = int(decoded_data[i:i+3])
-                decoded_data = integer.to_bytes(1, byteorder='big')
-                bytes_file.write(decoded_data)
+        for i in range(0, len(decoded_data), 3):
+            integer = int(decoded_data[i:i+3])
+            decoded_bytes = integer.to_bytes(1, byteorder='big')
+            decoded_data += decoded_bytes
 
     elif huffman == False:
-        print("\033[1;31m> Huffman compression is NOT applied\033[0m")
         if type == 'txt':
             decoded_data = utf8_bin_decode(data_without_parity)
-            with open(output, 'w') as f:
-                f.write(decoded_data)
         
         elif type == 'png' or type == 'jpg' or type == 'gz' or type == 'txt.gz': 
             decoded_data = binary_to_image_bytes(data_without_parity)
-            with open(output, 'wb') as binary_file:
-                binary_file.write(decoded_data)
-
-    output_file_size = os.path.getsize('./{}'.format(output))
-
-    # if os.path.exists(output):
-    #     os.remove(output)
-    # else:
-    #     pass
-
-    return output_file_size
+    
+    md5sum = hashlib.md5(decoded_data.encode('utf-8')).hexdigest()
+    return md5sum
 
 parser = argparse.ArgumentParser(description='Single Base Substitution Mutations Simulator')
 
