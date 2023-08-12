@@ -17,25 +17,25 @@ def utf8_bin_decode(string):
     decoded_string = ''
 
     for i in range(0, len(string), 80):
-        sentence = string[i: i + 80]
-        while len(sentence) != 0:
+        chunk = string[i: i + 80]
+        while len(chunk) != 0:
 
-            if sentence.startswith('0'):
-                f = sentence[:8]
+            if chunk.startswith('0'):
+                f = chunk[:8]
 
-            elif sentence.startswith('110'):
-                f = sentence[0:16]
+            elif chunk.startswith('110'):
+                f = chunk[0:16]
 
-            elif sentence.startswith('1110'):
-                f = sentence[0:24]
+            elif chunk.startswith('1110'):
+                f = chunk[0:24]
 
-            elif sentence.startswith('11110'):
-                f = sentence[0:32]
+            elif chunk.startswith('11110'):
+                f = chunk[0:32]
                 
             else:
                 break
             try:
-                sentence = sentence.removeprefix(f)
+                chunk = chunk.removeprefix(f)
                 bit = int(f, 2)
                 bit = bit.to_bytes((bit.bit_length() + 7) // 8, 'big').decode('utf-8')
                 decoded_string += bit
