@@ -1,10 +1,10 @@
 import argparse
 import hashlib
 import random
+import datetime
 import os
 
 ######################################### General Functions #######################################
-
 def dna_to_binary(data):
     data = data.replace('T', 'C')
     data = data.replace('A', 'G')
@@ -16,49 +16,32 @@ def dna_to_binary(data):
 
 def utf8_bin_decode(string):
     decoded_string = ''
-    while len(string) != 0:
 
-        if string.startswith('0'):
-            f = string[:8]
-            string = string.removeprefix(f)
-            try:
-                bit = int(f, 2)  # Convert the binary segment to an integer
-                bit = bit.to_bytes((bit.bit_length() + 7) // 8, 'big').decode('utf-8')
-                decoded_string += bit 
-            except:
-                pass    
+    for i in range(0, len(string), 80):
+        chunk = string[i: i + 80]
+        while len(chunk) != 0:
 
-        elif string.startswith('110'):
-            f = string[0:16]
-            string = string.removeprefix(f)
-            try:
-                bit = int(f, 2)  # Convert the binary segment to an integer
-                bit = bit.to_bytes((bit.bit_length() + 7) // 8, 'big').decode('utf-8')
-                decoded_string += bit
-            except:
-                pass
+            if chunk.startswith('0'):
+                f = chunk[:8]
 
-        elif string.startswith('1110'):
-            f = string[0:24]
-            string = string.removeprefix(f)
+            elif chunk.startswith('110'):
+                f = chunk[0:16]
+
+            elif chunk.startswith('1110'):
+                f = chunk[0:24]
+
+            elif chunk.startswith('11110'):
+                f = chunk[0:32]
+                
+            else:
+                break
             try:
-                bit = int(f, 2)  # Convert the binary segment to an integer
+                chunk = chunk.removeprefix(f)
+                bit = int(f, 2)
                 bit = bit.to_bytes((bit.bit_length() + 7) // 8, 'big').decode('utf-8')
                 decoded_string += bit
             except:
                 pass
-
-        elif string.startswith('11110'):
-            f = string[0:32]
-            string = string.removeprefix(f)
-            try:
-                bit = int(f, 2)  # Convert the binary segment to an integer
-                bit = bit.to_bytes((bit.bit_length() + 7) // 8, 'big').decode('utf-8')
-                decoded_string += bit
-            except:
-                pass
-        else:
-            break
         
     return decoded_string
 
@@ -78,12 +61,20 @@ def decode_header(header):
     n = 8  # Number of bits in each segment
     x = [header[i:i+n] for i in range(0, len(header), n)]  # Split the header into segments of n bits
     for bit in x:
-        bit = int(bit, 2)  # Convert the binary segment to an integer
-        bit = bit.to_bytes((bit.bit_length() + 7) // 8, 'big').decode()  # Convert the integer to its corresponding ASCII character
-        integers += bit  # Concatenate the ASCII characters to form the decoded header string
-    integers = int(integers)  # Convert the decoded header string to an integer
-
-    return integers
+        try:
+            bit = int(bit, 2)  # Convert the binary segment to an integer
+            bit = bit.to_bytes((bit.bit_length() + 7) // 8, 'big').decode()  # Convert the integer to its corresponding ASCII character
+            integers += bit  # Concatenate the ASCII characters to form the decoded header string
+        except (ValueError, UnicodeDecodeError):
+            # Skip this segment if conversion fails
+            continue
+            
+    try:
+        integers = int(integers)  # Convert the decoded header string to an integer
+        return integers
+    except ValueError:
+        # Handle the case where the final integer conversion fails
+        return 0 
 
 def construct_huffman_dict(instructions_string):
     """
@@ -102,11 +93,13 @@ def construct_huffman_dict(instructions_string):
     if instructions_string.find(',,') != -1:  # Check if multiple sets of codes are present
         codes_list = instructions_string.split(',,')  # Split the instructions into separate code sets
         codes_list1 = codes_list[0].split(',')  # Split the first set of codes
-        codes = [code for code in codes_list1]
+        for code in codes_list1:
+            codes.append(code)
 
         codes_list2 = codes_list[1].split(',')  # Split the second set of codes
         codes_list2[0] = ',' + codes_list2[0]
-        codes = [code for code in codes_list2]
+        for code in codes_list2:
+            codes.append(code)
     else:
         codes = instructions_string[1:].split(',')  # Split the codes if only one set is present
 
@@ -137,7 +130,7 @@ def huffman_decode(encoded_data, huffman_codes):
             decoded_data += inverse_codes[current_code]  # Append the decoded character to the decoded data
             current_code = ''  # Reset the current code
         else:
-            continue
+            pass
 
     return decoded_data
 
@@ -167,8 +160,6 @@ def read_file(file_name):
 
     return encoded_data
 
-#################################### Hamming Error Correction Functions ############################
-
 def bit_switch(bit):
     if bit == 1:
         return 0
@@ -177,15 +168,16 @@ def bit_switch(bit):
     
 def hamming_correct(string):
     bits = [int(i) for i in string]
-    error = False
 
     if len(bits) == 7:
         parity_indices = [(0, 1, 3), (0, 2, 3), (1, 2, 3)]
         parities = [bits[i] ^ bits[j] ^ bits[k] for i, j, k in parity_indices]
-
+        
         p1 = parities[0] == bits[4]
         p2 = parities[1] == bits[5]
         p3 = parities[2] == bits[6]
+
+        error = False
 
         if p1 == False and p2 == False and p3 == True:
             bits[0] = bit_switch(bits[0])
@@ -213,6 +205,10 @@ def hamming_correct(string):
         elif p1 == True and p2 == True and p3 == False:
             bits[6] = bit_switch(bits[6])
             error = True
+
+        elif p1 == True and p2 == True and p3 == True:
+            error = False
+            pass
     
     elif len(bits) == 6:
         parity_indices = [(0, 1), (1, 2), (0, 2)]
@@ -246,6 +242,10 @@ def hamming_correct(string):
             bits[5] = bit_switch(bits[5])
             error = True
 
+        elif p1 == True and p2 == True and p3 == True:
+            error = False
+            pass
+
     elif len(bits) == 5:
         x1 = bit_switch(bits[0])
         x2 = bit_switch(bits[1])
@@ -275,19 +275,27 @@ def hamming_correct(string):
             bits[4] = bit_switch(bits[4])
             error = True
 
+        elif p1 == True and p2 == True and p3 == True:
+            error = False
+            pass
+
     elif len(bits) == 3:
         if bits[0] != max(set(bits), key = bits.count):
             bits[0] = max(set(bits), key = bits.count)
             error = True
+        else:
+            error = False
+            pass
 
     corrected_string = ''.join([str(i) for i in bits])
+    
     return corrected_string, error
 
 def correct_string(string):
 
     corrected_string = ''
     errors_count = 0
-    
+
     for i in range(0, len(string), 7):
         codeword_dna = string[i:i+7]
         codeword_binary = dna_to_binary(codeword_dna)
@@ -296,7 +304,7 @@ def correct_string(string):
 
         if error == True:
             errors_count += 1
-
+            
     return corrected_string, errors_count
 
 def remove_hamming_bits(data):
@@ -351,7 +359,7 @@ def simulate_substitution(sequence, mutation_rate):
         sequence[position] = new_nucleotide
 
     mutated_sequence = ''.join(sequence)
-    return mutated_sequence
+    return mutated_sequence, num_mutations
 
 def run_code(data, huffman, type):
 
@@ -365,12 +373,11 @@ def run_code(data, huffman, type):
         huffman_dict = construct_huffman_dict(huffman_instructions_string_binary)  # Construct the Huffman dictionary from the Huffman instructions
         decoded_data = huffman_decode(dna_to_binary(data_without_parity[(header_len + 1) * 8 + instructions_length:]), huffman_dict)  # Decode the data using Huffman decoding
 
-                            
     elif type == 'png' or type == 'jpg' or type == 'gz' or type == 'txt.gz':
         for i in range(0, len(decoded_data), 3):
             integer = int(decoded_data[i:i+3])
             decoded_bytes = integer.to_bytes(1, byteorder='big')
-            decoded_data += decoded_bytes
+            decoded_data += str(decoded_bytes)
 
     elif huffman == False:
         if type == 'txt':
@@ -380,7 +387,7 @@ def run_code(data, huffman, type):
             decoded_data = binary_to_image_bytes(data_without_parity)
     
     md5sum = hashlib.md5(decoded_data.encode('utf-8')).hexdigest()
-    return md5sum
+    return md5sum, errors_count
 
 parser = argparse.ArgumentParser(description='Single Base Substitution Mutations Simulator')
 
@@ -392,32 +399,48 @@ parser.add_argument('-n', '--n_sims', required=True, type=int, metavar='')
 
 args = parser.parse_args()
 if __name__ == '__main__':
-
+    
     with open(args.input_file, 'r', encoding='utf-8', newline='\r\n') as f:
         data = f.read()
 
-    unmutated_md5sum = run_code(data, args.Huffman, args.type)
+    current_time = datetime.datetime.now()
+    formatted_time = current_time.strftime("%Y%m%d%H%M%S")
+
+    print("\n\033[1;34m################################ Single Base Substitutions Simulator ################################\033[0m")
+    print("\033[1;35m# Input File Name:\033[0m \033[93m{}\033[0m".format(args.input_file))
+    print("\033[1;35m# Input Sequence Length:\033[0m \033[93m{} DNA bases\033[0m".format(len(data)))
+    print("\033[1;35m# Mutations Rate:\033[0m \033[93m{} %\033[0m".format(args.mutations_rate *100))
+    print("\033[1;35m# Number of Mutations:\033[0m \033[93m{}\033[0m".format(round(len(data) * args.mutations_rate)))
+    print("\033[1;35m# Number of Runs:\033[0m \033[93m{}\033[0m".format(args.n_sims))
+    print("\033[1;35m# Huffman:\033[0m \033[93m{}\033[0m".format(args.Huffman))
+    print("\033[1;35m# Error Correction Method:\033[0m \033[93mHamming\033[0m")
     
+    unmutated_md5sum = run_code(data, args.Huffman, args.type)[0]
+    # print("\n> md5sum key was generated for the input sequence without mutations.")
+    print("\n------------------- \033[1;34mSimulating\033[0m -------------------")
+    print("--------------------------------------------------")
     number_of_run = 0
     for i in range(0, args.n_sims, 1):
-        mutated_data = simulate_substitution(data, args.mutations_rate)
-        mutated_md5sum = run_code(mutated_data, args.Huffman, args.type)
+        mutated_data, num_mutations = simulate_substitution(data, args.mutations_rate)
+        mutated_md5sum, errors_count = run_code(mutated_data, args.Huffman, args.type)
         number_of_run += 1
 
-        print('Run: {}'.format(number_of_run))
+        if unmutated_md5sum == mutated_md5sum:
+            check = 1
+            status = "\033[1;32mFull Decryption\033[0m"
+        else: 
+            check = 0
+            status = "\033[1;31mIncomplete Decryption\033[0m"
+
+        print(' Run: {}, Progress: {} %, status: {}'.format(number_of_run, round(number_of_run/args.n_sims * 100), status))
         if os.path.exists('./Mutations_simulator_report.csv'):
             pass
         else:
             with open('Mutations_simulator_report.csv', 'w') as f:
-                f.write('Input File,Run Number,Mutations Rate (%),Perfect Retrieval\n')
-        
-        if unmutated_md5sum == mutated_md5sum:
-            check = 1
-        else: 
-            check = 0
+                f.write('ID,Input File,Run Number,Mutations Rate (%),Number of Mutations,Corrected Errors,Perfect Retrieval(0/1)\n')
 
         with open('Mutations_simulator_report.csv', 'a') as f:
-            f.write(args.input_file + ',' + str(number_of_run) + ',' + str(args.mutations_rate) + ',' + str(check) + '\n')
+            f.write(formatted_time + ',' + args.input_file + ',' + str(number_of_run) + ',' + str(args.mutations_rate) + ',' + str(num_mutations) + ',' + str(errors_count) + ',' + str(check) + '\n')
 
 else:
     pass
