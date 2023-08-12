@@ -413,12 +413,9 @@ if __name__ == '__main__':
     print("\033[1;35m# Number of Mutations:\033[0m \033[93m{}\033[0m".format(round(len(data) * args.mutations_rate)))
     print("\033[1;35m# Number of Runs:\033[0m \033[93m{}\033[0m".format(args.n_sims))
     print("\033[1;35m# Huffman:\033[0m \033[93m{}\033[0m".format(args.Huffman))
-    print("\033[1;35m# Error Correction Method:\033[0m \033[93mHamming\033[0m")
+    print("\033[1;35m# Error Correction Method:\033[0m \033[93mHamming\033[0m\n")
     
     unmutated_md5sum = run_code(data, args.Huffman, args.type)[0]
-    # print("\n> md5sum key was generated for the input sequence without mutations.")
-    print("\n------------------- \033[1;34mSimulating\033[0m -------------------")
-    print("--------------------------------------------------")
     number_of_run = 0
     for i in range(0, args.n_sims, 1):
         mutated_data, num_mutations = simulate_substitution(data, args.mutations_rate)
@@ -432,7 +429,7 @@ if __name__ == '__main__':
             check = 0
             status = "\033[1;31mIncomplete Decryption\033[0m"
 
-        print(' Run: {}, Progress: {} %, status: {}'.format(number_of_run, round(number_of_run/args.n_sims * 100), status))
+        print('Run: {}, Progress: {} %, status: {}'.format(number_of_run, round(number_of_run/args.n_sims * 100), status))
         if os.path.exists('./Mutations_simulator_report.csv'):
             pass
         else:
@@ -441,6 +438,9 @@ if __name__ == '__main__':
 
         with open('Mutations_simulator_report.csv', 'a') as f:
             f.write(formatted_time + ',' + args.input_file + ',' + str(number_of_run) + ',' + str(args.mutations_rate) + ',' + str(num_mutations) + ',' + str(errors_count) + ',' + str(check) + '\n')
+    
+    print("\n> The SBS simulator was executed successfully.")
+    print("> Data regarding the procedure was documented and stored within the file: \033[93mMutations_simulator_report.csv\033[0m")
 
 else:
     pass
