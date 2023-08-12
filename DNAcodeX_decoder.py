@@ -15,49 +15,32 @@ def dna_to_binary(data):
 
 def utf8_bin_decode(string):
     decoded_string = ''
-    while len(string) != 0:
 
-        if string.startswith('0'):
-            f = string[:8]
-            string = string.removeprefix(f)
-            try:
-                bit = int(f, 2)  # Convert the binary segment to an integer
-                bit = bit.to_bytes((bit.bit_length() + 7) // 8, 'big').decode('utf-8')
-                decoded_string += bit 
-            except:
-                pass    
+    for i in range(0, len(string), 80):
+        sentence = string[i: i + 80]
+        while len(sentence) != 0:
 
-        elif string.startswith('110'):
-            f = string[0:16]
-            string = string.removeprefix(f)
-            try:
-                bit = int(f, 2)  # Convert the binary segment to an integer
-                bit = bit.to_bytes((bit.bit_length() + 7) // 8, 'big').decode('utf-8')
-                decoded_string += bit
-            except:
-                pass
+            if sentence.startswith('0'):
+                f = sentence[:8]
 
-        elif string.startswith('1110'):
-            f = string[0:24]
-            string = string.removeprefix(f)
+            elif sentence.startswith('110'):
+                f = sentence[0:16]
+
+            elif sentence.startswith('1110'):
+                f = sentence[0:24]
+
+            elif sentence.startswith('11110'):
+                f = sentence[0:32]
+                
+            else:
+                break
             try:
-                bit = int(f, 2)  # Convert the binary segment to an integer
+                sentence = sentence.removeprefix(f)
+                bit = int(f, 2)
                 bit = bit.to_bytes((bit.bit_length() + 7) // 8, 'big').decode('utf-8')
                 decoded_string += bit
             except:
                 pass
-
-        elif string.startswith('11110'):
-            f = string[0:32]
-            string = string.removeprefix(f)
-            try:
-                bit = int(f, 2)  # Convert the binary segment to an integer
-                bit = bit.to_bytes((bit.bit_length() + 7) // 8, 'big').decode('utf-8')
-                decoded_string += bit
-            except:
-                pass
-        else:
-            break
         
     return decoded_string
 
