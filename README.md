@@ -9,7 +9,7 @@ compressed files).
 3. Detecting and correcting single base substitution errors using Hamming errors correcting rules.
 4. Mapping binary to DNA bases (encoding) and DNA bases to binary (decoding).
 
-    • 1 is mapped to G and 0 is mapped to C. Then DNAcodeX loops through the GC sequence
+    - 1 is mapped to G and 0 is mapped to C. Then DNAcodeX loops through the GC sequence
     and for each even position: if the base is C it gets converted to T, and if the base is G it
     gets converted to A.
     Note: There are two reasons for this mapping:
@@ -18,11 +18,11 @@ compressed files).
     
     (b) To diversify the composition of the sequence.
 
-    • For the decoding process As and Ts are first converted to Gs and Cs respectively. Then,
+    - For the decoding process As and Ts are first converted to Gs and Cs respectively. Then,
     G is mapped to 1 and C is mapped to 0.
 
 
-UTF-8 and other file formats
+## UTF-8 and other file formats
 UTF-8 is a method for encoding Unicode characters (which represent characters from various languages and symbols) into a sequence of 8-bit bytes. This means that each character is represented using a combination of 8 bits (1 byte) or multiple bytes, depending on the character’s codepoint. By comparison, ASCII (American Standard Code for Information Interchange) includes encodings for only 128-characters.
 In UTF-8, when a character needs more than one byte to be represented, the first byte is called a
 ”leading byte.” The leading byte starts with a specific pattern of bits that indicates how many bytes will follow to complete the character’s representation, as illustrated bellow:
