@@ -12,6 +12,7 @@ compressed files).
     - 1 is mapped to G and 0 is mapped to C. Then DNAcodeX loops through the GC sequence
     and for each even position: if the base is C it gets converted to T, and if the base is G it
     gets converted to A.
+
     **Note** : There are two reasons for this mapping:
     
         - Since Gs and Cs are converted to As and Ts respectively, errors that substitute A bases with G bases or T bases with C bases are not actually considered errors as they represent the same bit when the                sequence is converted to binary. This mapping method adds up to the robustness of DNAcodeX when correcting single base substitution errors.
