@@ -26,7 +26,7 @@ UTF-8 and other file formats
 UTF-8 is a method for encoding Unicode characters (which represent characters from various languages and symbols) into a sequence of 8-bit bytes. This means that each character is represented using a combination of 8 bits (1 byte) or multiple bytes, depending on the character’s codepoint. By comparison, ASCII (American Standard Code for Information Interchange) includes encodings for only 128-characters.
 In UTF-8, when a character needs more than one byte to be represented, the first byte is called a
 ”leading byte.” The leading byte starts with a specific pattern of bits that indicates how many bytes will follow to complete the character’s representation, as illustrated bellow:
-    • 0xxxxxxx ----> 1 byte character
-    • 110xxxxx 10xxxxxx ----> 2 bytes character
-    • 1110xxxx 10xxxxxx 10xxxxxx ----> 3 bytes character
-    • 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx ----> 4 bytes character
+    -0xxxxxxx ----> 1 byte character
+    -110xxxxx 10xxxxxx ----> 2 bytes character
+    -1110xxxx 10xxxxxx 10xxxxxx ----> 3 bytes character
+    -11110xxx 10xxxxxx 10xxxxxx 10xxxxxx ----> 4 bytes character
