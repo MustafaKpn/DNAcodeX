@@ -151,6 +151,7 @@ There are two required inputs that are necessary for the execution of the encode
     - GZ for compressed files.
 
 Similarly, there are two inputs that are not crucial for running the encoder. One of them yields different results when used. The function -huffman indicates that the Huffman coding algorithm should be used for encoding the input file. If this flag is not called, data would be encoded by simply mapping the binary data to ATCG bases. The output file name (without the extension) after the function -o. This is not necessary and if not specified, the output DNA sequence would be stored in a file with a default name.
+
 **Examples for running the encoder**
 
 Let us assume we wish to encode the file ”bible.txt,” which is located in the same directory as the encoder code. Additionally, we intend to save the resulting DNA sequence output in a text file named ”bible_encoded”. Here is the corresponding command if we want to use the Huffman compression algorithm:
