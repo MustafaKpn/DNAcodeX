@@ -81,6 +81,7 @@ sequence and adds parity bits based on different rules for each length as follow
       - X3 = B1 ⊕ B3
         
     We can call it Hamming (6, 3).
+  
     Cases would be:
   
       - Case 1 : incorrect parity bit/s: None → No error
@@ -105,3 +106,25 @@ sequence and adds parity bits based on different rules for each length as follow
       - Case 4: incorrect parity bit/s: X1 → error at X1
       - Case 5: incorrect parity bit/s: X2 → error at X2
       - Case 6: incorrect parity bit/s: X3 → error at X3
+
+- Finally, if the number of leftover bits is 1 (B1), 2 parity bits that represent a repetition of B1 are
+added:
+    - If B1 = 1, X1 = X2 = 1
+    - If B1 = 0, X1 = X2 = 0
+     We can call it Hamming (3, 1).
+
+For this case, if an error occurs somewhere in the 3-bit codeword, the correct B1 would be the bit that is represented the most. For example: If the original message is 1, the bit is repeated twice so that the encoded message becomes 111. Assuming an error occurs in the first bit the
+message becomes 011. By checking the first bit, it can be concluded that it does not match the bit that is more frequent which is 1. This information is used to perform the correction.
+
+## Mutations Simulator
+The mutations_simulator.py script was written in Python for both simulating Single Base Substitution (SBS) mutations in the DNAcodeX generated sequences and performing the experiment to report its effectiveness. The primary focus of the script is to help assess the efficiency of decoding
+mutated sequences. The efficiency testing involves comparing two scenarios:
+    - When incorporating the Hamming correction algorithm during decoding.
+    - When decoding without Hamming correction algorithm.
+
+The mutations simulator takes three inputs:
+1. The input sequence that needs to be tested.
+2. The rate at which mutations (Single Base Substitution) are introduced in the sequence.
+3. The number of times the simulation should be repeated.
+
+We use the cryptographic hash function MD5 (Message-Digest Algorithm 5) to authenticate the content of files or strings. The script first decodes the sequence without introducing any errors to produce a 128-bit reference value using MD5. After that, mutations are introduced based on the provided mutations rate. Then, the script tries to decode the sequence after attempting to detect and correct the introduced errors and produces MD5 hash value for the mutated sequence to compare it with the one of the unmutated sequence. If the MD5 strings match, the script records the value 1 indicating a perfect match. Otherwise, it records 0 (even if one character was decoded incorrectly). The script iterates over the specified number of runs (as provided in the input), introducing mutations, decoding, comparing, and recording data for each run.
