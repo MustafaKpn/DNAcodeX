@@ -14,7 +14,9 @@ compressed files).
     gets converted to A.
 
 **Note** : There are two reasons for this mapping:
+    
     - Since Gs and Cs are converted to As and Ts respectively, errors that substitute A bases with G bases or T bases with C bases are not actually considered errors as they represent the same bit when the sequence is converted to binary. This mapping method adds up to the robustness of DNAcodeX when correcting single base substitution errors.
+    
     - To diversify the composition of the sequence.
 
     - For the decoding process As and Ts are first converted to Gs and Cs respectively. Then,
