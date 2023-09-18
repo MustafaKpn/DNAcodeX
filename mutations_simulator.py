@@ -347,7 +347,7 @@ def binary_to_image_bytes(binary_data):
 def simulate_substitution(sequence, mutation_rate):
     sequence = list(sequence)
     seq_length = len(sequence)
-    num_mutations = int(seq_length * mutation_rate)
+    num_mutations = round(int(seq_length * mutation_rate))
 
     mutation_positions = random.sample(range(seq_length), num_mutations)
 
