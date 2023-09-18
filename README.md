@@ -79,8 +79,10 @@ sequence and adds parity bits based on different rules for each length as follow
       - X1 = B1 ⊕ B2
       - X2 = B2 ⊕ B3
       - X3 = B1 ⊕ B3
+        
     We can call it Hamming (6, 3).
     Cases would be:
+  
       - Case 1 : incorrect parity bit/s: None → No error
       - Case 2: incorrect parity bit/s: X1 and X3 → error at B1
       - Case 3: incorrect parity bit/s: X1 and X2 → error at B2
@@ -94,7 +96,9 @@ sequence and adds parity bits based on different rules for each length as follow
       - X3 = B1 ⊕ B2
      
     We can call it Hamming (5, 2).
+  
     Cases would be:
+  
       - Case 1: incorrect parity bit/s: None → No error
       - Case 2: incorrect parity bit/s: X1 and X3 → error at B1
       - Case 3: incorrect parity bit/s: X2 and X3 → error at B2
